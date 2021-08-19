@@ -63,3 +63,10 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "network/register.html")
+
+
+@login_required
+def compose(request):
+    """ Compose a new post """
+
+    

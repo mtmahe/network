@@ -1,5 +1,14 @@
 {% extends "network/layout.html" %}
+{% load static %}
 
 {% block body %}
-    TODO
+  <div class="section-container" id="new-post-view">
+  </div>
+
+  <div class="section-container" id="posts-view">
+  </div>
+{% endblock %}
+
+{% block script %}
+  <script src="{% static 'network/index.js' %}"></script>
 {% endblock %}
