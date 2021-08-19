@@ -4,3 +4,13 @@ from django.db import models
 
 class User(AbstractUser):
     pass
+
+
+class Post(models.Model):
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="posts")
+    body = models.TextField(blank=True)
+    tiemstamp = models.DateTimeField(auto_now_add=True)
+
+
+# another for likes
+# another for comments
