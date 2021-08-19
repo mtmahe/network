@@ -11,6 +11,18 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from django.contrib.messages import constants as messages
+
+from project4.config import Config
+
+
+MESSAGE_TAGS = {
+    messages.DEBUG: 'alert-secondary',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
+}
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,7 +32,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '13kl@xtukpwe&xj2xoysxe9_6=tf@f8ewxer5n&ifnd46+6$%8'
+SECRET_KEY = Config.DJANGO_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -122,6 +134,12 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
+# Redirect automatically after login
+
+LOGIN_REDIRECT_URL = 'index'
+LOGIN_URL = 'login'
+
+
 # Let Django auto create id fields
 
-DEFAULT_AUTO_FIELD='django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
