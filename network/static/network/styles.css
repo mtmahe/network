@@ -1,0 +1,23 @@
+.main-container {
+  margin: 1em;
+}
+
+.section-container {
+  margin: 0 1em;
+  border: 1px solid #cfcfcf;
+  border-radius: .2em;
+  padding: 1em;
+}
+
+.next_post_div {
+  margin: 0.5em 1em;
+  border: 1px solid #cfcfcf;
+  border-radius: .2em;
+  padding: 1em;
+}
+
+.next_post_div p {
+  margin-top: 0.8em;
+  margin-bottom: 0;
+  padding: 0;
+}
