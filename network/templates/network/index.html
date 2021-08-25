@@ -3,21 +3,123 @@
 
 {% block body %}
   <div class="main-container">
-    <h3 id="title">Title</h3>
-    <div class="section-container" id="new-post-view">
-      <h5>New Post</h5>
-      <form id="new-post-form">
-        <!-- {% csrf_token %} -->
-        <textarea class="form-control" id="new-post-body" rows="2" cols="80"></textarea>
-        <input type="submit" value="Post" class="btn btn-primary">
-      </form>
-    </div>
+    <div id="new-post"></div>
 
-    <div id="posts-view">
-    </div>
+    <div id="posts-list"></div>
   </div>
-{% endblock %}
 
-{% block script %}
-  <script src="{% static 'network/index.js' %}"></script>
+
+
+  <script type="text/babel">
+
+    class PostForm extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          value: 'Please write your new post here.'
+        };
+
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+      }
+
+      handleChange(event) {
+        this.setState({value: event.target.value});
+      }
+
+      handleSubmit(event) {
+        alert('A post was submitted: ' + this.state.value);
+        event.preventDefault();
+      }
+
+
+
+      render() {
+        return (
+          <div className="section-container" id="new-post-view">
+            <form onSubmit={this.handleSubmit}>
+              <h5 id="title">New Post: </h5>
+              <textarea
+                className="form-control"
+                value={this.state.value}
+                onChange={this.handleChange}
+              />
+              <input type="submit" className="btn btn-primary" value="Post" />
+            </form>
+          </div>
+        );
+      }
+    }
+
+    ReactDOM.render(
+      <PostForm />,
+      document.getElementById('new-post')
+    );
+
+
+    class MyComponent extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          error: null,
+          isLoaded: false,
+          items: []
+        };
+      }
+
+      componentDidMount() {
+        fetch("/posts/all")
+          .then(res => res.json())
+          .then(
+            (result) => {
+              console.log(result);
+              this.setState({
+                isLoaded: true,
+                items: result
+              });
+            },
+            // Note: it's important to handle errors here
+            // instead of a catch() block so that we don't swallow
+            // exceptions from actual bugs in components.
+            (error) => {
+              this.setState({
+                isLoaded: true,
+                error
+              });
+            }
+          )
+      }
+
+      render() {
+        const { error, isLoaded, items } = this.state;
+        if (error) {
+          return <div>Error: {error.message}</div>;
+        } else if (!isLoaded) {
+          return <div>Loading...</div>;
+        } else {
+          return (
+            <ul>
+              {items.map(item => (
+                <li className="section-container" key={item.id}>
+                  <strong>{item.owner}</strong>
+                  <p>{item.body}</p>
+                  <small>{item.timestamp}</small>
+                  <p>likes</p>
+                </li>
+              ))}
+            </ul>
+          );
+        }
+      }
+    }
+
+
+    ReactDOM.render (
+      <MyComponent />,
+      document.getElementById('posts-list')
+    );
+
+
+
+  </script>
 {% endblock %}
