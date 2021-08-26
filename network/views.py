@@ -67,19 +67,19 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "network/register.html")
-
+from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
-@login_required
 def compose(request):
     """ Compose a new post """
 
     if request.method != "POST":
+        print('not post')
         return JsonResponse({"error": "POST request required."}, status=400)
 
     # Get contents of post
+    print('post request')
     data = json.loads(request.body)
-    print(data)
     body = data.get("body", "")
     print(f'The body is {body}')
 
@@ -97,6 +97,6 @@ def compose(request):
 def query_posts(request):
     """ Get all posts """
 
-    posts = Post.objects.all()
-    # posts = posts.order_by("-id").all()
+    # posts = Post.objects.all()
+    posts = Post.objects.all().order_by("-id")
     return JsonResponse([post.serialize() for post in posts], safe=False)

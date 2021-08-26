@@ -56,3 +56,25 @@ ReactDOM.render (
   <PostsView posts={posts}/>,
   document.getElementById('posts-list')
 );
+
+
+
+
+render() {
+  const { error, isLoaded, items } = this.state;
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  } else if (!isLoaded) {
+    return <div>Loading...</div>;
+  } else {
+    return (
+      <ul>
+        {items.map(item => (
+          <li key={item.id}>
+            {item}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+}

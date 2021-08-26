@@ -28,6 +28,16 @@
       }
 
       handleSubmit(event) {
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ body: this.state.value})
+        };
+        fetch('/posts/compose', requestOptions)
+          .then(response => response.json())
+          .then(result => {
+            console.log(result);
+          })
         alert('A post was submitted: ' + this.state.value);
         event.preventDefault();
       }
