@@ -74,19 +74,54 @@
         this.state = {
           error: null,
           isLoaded: false,
-          items: []
+          items: [],
+          pageNumber: 1
         };
       }
 
       componentDidMount() {
-        fetch("/posts/all")
+        fetch(`/posts/all/${this.state.pageNumber}`)
           .then(res => res.json())
           .then(
             (result) => {
               console.log(result);
+              console.log(`page number ${this.state.pageNumber}`);
               this.setState({
                 isLoaded: true,
-                items: result
+                items: result.pages,
+                hasNext: result.has_next,
+                hasPrevious: result.has_previous,
+                numPages: result.num_pages,
+              });
+            },
+            // Note: it's important to handle errors here
+            // instead of a catch() block so that we don't swallow
+            // exceptions from actual bugs in components.
+            (error) => {
+              this.setState({
+                isLoaded: true,
+                error
+              });
+            }
+          )
+      }
+
+      handleClick(index) {
+        let pageNumber = this.state.pageNumber === index ? this.state.pageNumber : index;
+        this.setState({pageNumber});
+        console.log(`clicked: ${index}, current is ${this.state.pageNumber}`);
+        fetch(`/posts/all/${index}`)
+          .then(res => res.json())
+          .then(
+            (result) => {
+              console.log(result);
+              console.log(`page number ${this.state.pageNumber}`);
+              this.setState({
+                isLoaded: true,
+                items: result.pages,
+                hasNext: result.has_next,
+                hasPrevious: result.has_previous,
+                numPages: result.num_pages,
               });
             },
             // Note: it's important to handle errors here
@@ -103,6 +138,11 @@
 
       render() {
         const { error, isLoaded, items } = this.state;
+        var currentPage = this.state.pageNumber;
+        let listPages = [];
+        for (var i = 1; i < (this.state.numPages + 1); i++) {
+          listPages.push(<li key={i} className="page-item"><a className="page-link" onClick={this.handleClick.bind(this, i)}>{i}</a></li>);
+        }
         if (error) {
           return <div>Error: {error.message}</div>;
         } else if (!isLoaded) {
@@ -122,19 +162,21 @@
               </ul>
               <nav className="page-nav" aria-label="Page navigation">
                 <ul className="pagination justify-content-center">
-                  <li className="page-item">
-                    <a className="page-link" href="#" aria-label="Previous">
-                      <span aria-hidden="true">&laquo;</span>
-                    </a>
-                  </li>
-                  <li className="page-item"><a className="page-link" href="#">1</a></li>
-                  <li className="page-item"><a className="page-link" href="#">2</a></li>
-                  <li className="page-item"><a className="page-link" href="#">3</a></li>
-                  <li className="page-item">
-                    <a className="page-link" href="#" aria-label="Next">
-                      <span aria-hidden="true">&raquo;</span>
-                    </a>
-                  </li>
+                  {this.state.hasPrevious === true &&
+                    <li className="page-item">
+                      <a className="page-link" onClick={this.handleClick.bind(this, (currentPage -1))} aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                      </a>
+                    </li>
+                  }
+                  {listPages}
+                  {this.state.hasNext === true &&
+                    <li className="page-item">
+                      <a className="page-link" onClick={this.handleClick.bind(this, (currentPage +1))} aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                      </a>
+                    </li>
+                  }
                 </ul>
               </nav>
             </div>

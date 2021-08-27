@@ -6,6 +6,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
+from django.core.paginator import Paginator
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -94,9 +95,28 @@ def compose(request):
 
 
 @csrf_exempt
-def query_posts(request):
+def query_posts(request, page_number):
     """ Get all posts """
+
+    if not page_number:
+        page_number = 1
+
+    current_page = {}
 
     # posts = Post.objects.all()
     posts = Post.objects.all().order_by("-id")
-    return JsonResponse([post.serialize() for post in posts], safe=False)
+
+    # Pagination
+    objects = [post.serialize() for post in posts]
+
+    p = Paginator(objects, 2)
+    print(f'page number is {page_number}')
+    print(p.page(page_number).object_list)
+    current_page["pages"] = p.page(page_number).object_list
+    current_page["has_next"] = p.page(page_number).has_next()
+    current_page["has_previous"] = p.page(page_number).has_previous()
+    current_page["num_pages"] = p.num_pages
+
+
+    #return JsonResponse([post.serialize() for post in posts], safe=False)
+    return JsonResponse(current_page, safe=False)

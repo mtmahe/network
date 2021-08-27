@@ -13,4 +13,5 @@ urlpatterns = [
     path("posts", views.compose, name="compose"),
     path("posts/compose", views.compose, name="alt-compose"),
     path("posts/all", views.query_posts, name="query_posts"),
+    path("posts/all/<int:page_number>", views.query_posts, name="query_posts_paginated"),
 ]
