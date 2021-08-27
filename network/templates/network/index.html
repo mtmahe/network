@@ -17,7 +17,7 @@
       constructor(props) {
         super(props);
         this.state = {
-          value: 'Please write your new post here.'
+          value: ''
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -42,7 +42,7 @@
             console.log(result);
           })
         alert('A post was submitted: ' + this.state.value);
-        event.preventDefault();
+        //event.preventDefault();
       }
 
       render() {
