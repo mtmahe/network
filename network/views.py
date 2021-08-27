@@ -109,10 +109,14 @@ def query_posts(request, page_number):
     # Pagination
     objects = [post.serialize() for post in posts]
 
-    p = Paginator(objects, 2)
+    p = Paginator(objects, 10)
     print(f'page number is {page_number}')
-    print(p.page(page_number).object_list)
     current_page["pages"] = p.page(page_number).object_list
+    page_list = []
+    for i in range(p.num_pages):
+        page_list.append(i+1)
+    current_page["page_list"] = page_list
+    print(page_list)
     current_page["has_next"] = p.page(page_number).has_next()
     current_page["has_previous"] = p.page(page_number).has_previous()
     current_page["num_pages"] = p.num_pages

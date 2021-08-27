@@ -75,6 +75,7 @@
           error: null,
           isLoaded: false,
           items: [],
+          pageList: [],
           pageNumber: 1
         };
       }
@@ -89,6 +90,7 @@
               this.setState({
                 isLoaded: true,
                 items: result.pages,
+                pageList: result.page_list,
                 hasNext: result.has_next,
                 hasPrevious: result.has_previous,
                 numPages: result.num_pages,
@@ -119,6 +121,7 @@
               this.setState({
                 isLoaded: true,
                 items: result.pages,
+                pageList: result.page_list,
                 hasNext: result.has_next,
                 hasPrevious: result.has_previous,
                 numPages: result.num_pages,
@@ -140,8 +143,31 @@
         const { error, isLoaded, items } = this.state;
         var currentPage = this.state.pageNumber;
         let listPages = [];
-        for (var i = 1; i < (this.state.numPages + 1); i++) {
-          listPages.push(<li key={i} className="page-item"><a className="page-link" onClick={this.handleClick.bind(this, i)}>{i}</a></li>);
+        let pageList = this.state.pageList;
+
+        // Show two pages before, two pages after current.
+        var j = currentPage;
+        if ((j-2) > 0) {
+          listPages.push(<li key={j-2} className="page-item"><a className="page-link" onClick={this.handleClick.bind(this, j-2)}>{j-2}</a></li>);
+        }
+        if ((j-1) > 0) {
+          listPages.push(<li key={j-1} className="page-item"><a className="page-link" onClick={this.handleClick.bind(this, j-1)}>{j-1}</a></li>);
+        }
+        listPages.push(<li key={j} className="page-item active" aria-current="page">
+          <span className="page-link">
+            {j}
+            <span className="sr-only">(current)</span>
+          </span>
+        </li>);
+        if (pageList.includes(j+1)) {
+          console.log('next page exists');
+          listPages.push(<li key={j+1} className="page-item"><a className="page-link" onClick={this.handleClick.bind(this, j+1)}>{j+1}</a></li>);
+        } else {
+          console.log(`j ${j} pagelist ${pageList}`)
+        }
+        if (pageList.includes(j+2)) {
+          console.log('next page exists');
+          listPages.push(<li key={j+2} className="page-item"><a className="page-link" onClick={this.handleClick.bind(this, j+2)}>{j+2}</a></li>);
         }
         if (error) {
           return <div>Error: {error.message}</div>;
