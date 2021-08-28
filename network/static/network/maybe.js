@@ -1,8 +1,8 @@
-Class PostForm extends React.Component {
+class PostForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: 'Please write your new post here.'
+      value: ''
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -14,24 +14,38 @@ Class PostForm extends React.Component {
   }
 
   handleSubmit(event) {
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken
+      },
+      body: JSON.stringify({ body: this.state.value})
+    };
+    fetch('/posts/compose', requestOptions)
+      .then(response => response.json())
+      .then(result => {
+        console.log(result);
+      })
     alert('A post was submitted: ' + this.state.value);
-    event.preventDefault();
+    //event.preventDefault();
   }
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
-        <label>
-          New Post:
-          <textarea value={this.state.value} onChange={this.handleChange} />
-        </label>
-        <input type="submit" value="submit" />
-      </form>
+      <div className="section-container" id="new-post-view">
+        <form onSubmit={this.handleSubmit}>
+          <h5 id="title">New Post: </h5>
+          <textarea
+            className="form-control"
+            value={this.state.value}
+            onChange={this.handleChange}
+          />
+          <input type="submit" className="btn btn-primary" value="Post" />
+        </form>
+      </div>
     );
   }
 }
-
-
 
 ReactDOM.render(
   <PostForm />,
@@ -39,42 +53,151 @@ ReactDOM.render(
 );
 
 
-function PostsView(props) {
-  const posts = props.posts;
-  const listItems = posts.map((post) =>
-    <li className="section-container" >{post}</li>
-  );
-  return (
-    <ul>
-      {listItems}
-    </ul>
-  )
-}
+class MyComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      error: null,
+      isLoaded: false,
+      items: [],
+      pageList: [],
+      pageNumber: 1
+    };
+  }
 
-const posts = ['first post', 'second post', 'third post'];
-ReactDOM.render (
-  <PostsView posts={posts}/>,
-  document.getElementById('posts-list')
-);
+  componentDidMount() {
+    fetch(`/posts/all/${this.state.pageNumber}`)
+      .then(res => res.json())
+      .then(
+        (result) => {
+          console.log(result);
+          console.log(`page number ${this.state.pageNumber}`);
+          this.setState({
+            isLoaded: true,
+            items: result.pages,
+            pageList: result.page_list,
+            hasNext: result.has_next,
+            hasPrevious: result.has_previous,
+            numPages: result.num_pages,
+          });
+        },
+        // Note: it's important to handle errors here
+        // instead of a catch() block so that we don't swallow
+        // exceptions from actual bugs in components.
+        (error) => {
+          this.setState({
+            isLoaded: true,
+            error
+          });
+        }
+      )
+  }
 
+  handleClick(index) {
+    let pageNumber = this.state.pageNumber === index ? this.state.pageNumber : index;
+    this.setState({pageNumber});
+    console.log(`clicked: ${index}, current is ${this.state.pageNumber}`);
+    fetch(`/posts/all/${index}`)
+      .then(res => res.json())
+      .then(
+        (result) => {
+          console.log(result);
+          console.log(`page number ${this.state.pageNumber}`);
+          this.setState({
+            isLoaded: true,
+            items: result.pages,
+            pageList: result.page_list,
+            hasNext: result.has_next,
+            hasPrevious: result.has_previous,
+            numPages: result.num_pages,
+          });
+        },
+        // Note: it's important to handle errors here
+        // instead of a catch() block so that we don't swallow
+        // exceptions from actual bugs in components.
+        (error) => {
+          this.setState({
+            isLoaded: true,
+            error
+          });
+        }
+      )
+  }
 
+  render() {
+    const { error, isLoaded, items } = this.state;
+    var currentPage = this.state.pageNumber;
+    let listPages = [];
+    let pageList = this.state.pageList;
 
-
-render() {
-  const { error, isLoaded, items } = this.state;
-  if (error) {
-    return <div>Error: {error.message}</div>;
-  } else if (!isLoaded) {
-    return <div>Loading...</div>;
-  } else {
-    return (
-      <ul>
-        {items.map(item => (
-          <li key={item.id}>
-            {item}
-          </li>
-        ))}
-      </ul>
-    );
+    // Show two pages before, two pages after current.
+    var j = currentPage;
+    if ((j-2) > 0) {
+      listPages.push(<li key={j-2} className="page-item"><a className="page-link" onClick={this.handleClick.bind(this, j-2)}>{j-2}</a></li>);
+    }
+    if ((j-1) > 0) {
+      listPages.push(<li key={j-1} className="page-item"><a className="page-link" onClick={this.handleClick.bind(this, j-1)}>{j-1}</a></li>);
+    }
+    listPages.push(<li key={j} className="page-item active" aria-current="page">
+      <span className="page-link">
+        {j}
+        <span className="sr-only">(current)</span>
+      </span>
+    </li>);
+    if (pageList.includes(j+1)) {
+      console.log('next page exists');
+      listPages.push(<li key={j+1} className="page-item"><a className="page-link" onClick={this.handleClick.bind(this, j+1)}>{j+1}</a></li>);
+    } else {
+      console.log(`j ${j} pagelist ${pageList}`)
+    }
+    if (pageList.includes(j+2)) {
+      console.log('next page exists');
+      listPages.push(<li key={j+2} className="page-item"><a className="page-link" onClick={this.handleClick.bind(this, j+2)}>{j+2}</a></li>);
+    }
+    if (error) {
+      return <div>Error: {error.message}</div>;
+    } else if (!isLoaded) {
+      return <div>Loading...</div>;
+    } else {
+      return (
+        <div className="posts-container">
+          <ul>
+            {items.map(item => (
+              <li className="section-container" key={item.id}>
+                <strong>{item.owner}</strong>
+                <p>{item.body}</p>
+                <small>{item.timestamp}</small>
+                <p>likes</p>
+              </li>
+            ))}
+          </ul>
+          <nav className="page-nav" aria-label="Page navigation">
+            <ul className="pagination justify-content-center">
+              {this.state.hasPrevious === true &&
+                <li className="page-item">
+                  <a className="page-link" onClick={this.handleClick.bind(this, (currentPage -1))} aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+              }
+              {listPages}
+              {this.state.hasNext === true &&
+                <li className="page-item">
+                  <a className="page-link" onClick={this.handleClick.bind(this, (currentPage +1))} aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          </nav>
+        </div>
+      );
+    }
   }
 }
+
+
+ReactDOM.render (
+  <MyComponent />,
+  document.getElementById('posts-list')
+);

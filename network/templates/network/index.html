@@ -6,6 +6,10 @@
     <div id="new-post"></div>
 
     <div id="posts-list"></div>
+
+    <div id="profile-div"></div>
+
+    <div id="edit-div"></div>
   </div>
 
   <!-- Get csrf token -->
@@ -13,11 +17,61 @@
 
   <script type="text/babel">
 
-    class PostForm extends React.Component {
+
+    function NewPostForm(props) {
+      return (
+        <div className="section-container" id="new-post-view">
+          <form onSubmit={props.handleSubmit}>
+            <h5 id="title">New Post: </h5>
+            <textarea
+              className="form-control"
+              value={props.value}
+              onChange={props.handleChange}
+            />
+            <input type="submit" className="btn btn-primary" value="Post" />
+          </form>
+        </div>
+      );
+    }
+
+
+    function OrderedPosts(props) {
+      console.log(props);
+      if (props.current.error) {
+        return <div>Error: {props.current.error.message}</div>;
+      } else if (!props.current.isLoaded) {
+        return <div>Loading...</div>;
+      } else {
+        return (
+
+          // The posts go here
+          <div className="posts-container">
+            <ul>
+              {props.current.items.map(item => (
+                <li className="section-container" key={item.id}>
+                  <strong>{item.owner}</strong>
+                  <p>{item.body}</p>
+                  <small>{item.timestamp}</small>
+                  <p>likes</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    }
+
+
+    class App extends React.Component {
       constructor(props) {
         super(props);
         this.state = {
-          value: ''
+          formValue: '',
+          error: null,
+          isLoaded: false,
+          items: [],
+          pageList: [],
+          pageNumber: 1
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -43,41 +97,6 @@
           })
         alert('A post was submitted: ' + this.state.value);
         //event.preventDefault();
-      }
-
-      render() {
-        return (
-          <div className="section-container" id="new-post-view">
-            <form onSubmit={this.handleSubmit}>
-              <h5 id="title">New Post: </h5>
-              <textarea
-                className="form-control"
-                value={this.state.value}
-                onChange={this.handleChange}
-              />
-              <input type="submit" className="btn btn-primary" value="Post" />
-            </form>
-          </div>
-        );
-      }
-    }
-
-    ReactDOM.render(
-      <PostForm />,
-      document.getElementById('new-post')
-    );
-
-
-    class MyComponent extends React.Component {
-      constructor(props) {
-        super(props);
-        this.state = {
-          error: null,
-          isLoaded: false,
-          items: [],
-          pageList: [],
-          pageNumber: 1
-        };
       }
 
       componentDidMount() {
@@ -108,6 +127,7 @@
           )
       }
 
+      // pagination click handler
       handleClick(index) {
         let pageNumber = this.state.pageNumber === index ? this.state.pageNumber : index;
         this.setState({pageNumber});
@@ -140,7 +160,7 @@
       }
 
       render() {
-        const { error, isLoaded, items } = this.state;
+
         var currentPage = this.state.pageNumber;
         let listPages = [];
         let pageList = this.state.pageList;
@@ -169,51 +189,40 @@
           console.log('next page exists');
           listPages.push(<li key={j+2} className="page-item"><a className="page-link" onClick={this.handleClick.bind(this, j+2)}>{j+2}</a></li>);
         }
-        if (error) {
-          return <div>Error: {error.message}</div>;
-        } else if (!isLoaded) {
-          return <div>Loading...</div>;
-        } else {
-          return (
-            <div className="posts-container">
-              <ul>
-                {items.map(item => (
-                  <li className="section-container" key={item.id}>
-                    <strong>{item.owner}</strong>
-                    <p>{item.body}</p>
-                    <small>{item.timestamp}</small>
-                    <p>likes</p>
+
+        return(
+          <div>
+            <NewPostForm handleChange={this.handleChange}
+              handleSubmit={this.handleSubmit}
+              value={this.formValue}></NewPostForm>
+            <OrderedPosts current={this.state}></OrderedPosts>
+            <nav className="page-nav" aria-label="Page navigation">
+              <ul className="pagination justify-content-center">
+                {this.state.hasPrevious === true &&
+                  <li className="page-item">
+                    <a className="page-link" onClick={this.handleClick.bind(this, (currentPage -1))} aria-label="Previous">
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
                   </li>
-                ))}
+                }
+                {listPages}
+                {this.state.hasNext === true &&
+                  <li className="page-item">
+                    <a className="page-link" onClick={this.handleClick.bind(this, (currentPage +1))} aria-label="Next">
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                }
               </ul>
-              <nav className="page-nav" aria-label="Page navigation">
-                <ul className="pagination justify-content-center">
-                  {this.state.hasPrevious === true &&
-                    <li className="page-item">
-                      <a className="page-link" onClick={this.handleClick.bind(this, (currentPage -1))} aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                      </a>
-                    </li>
-                  }
-                  {listPages}
-                  {this.state.hasNext === true &&
-                    <li className="page-item">
-                      <a className="page-link" onClick={this.handleClick.bind(this, (currentPage +1))} aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                      </a>
-                    </li>
-                  }
-                </ul>
-              </nav>
-            </div>
-          );
-        }
+            </nav>
+          </div>
+        );
       }
     }
 
 
     ReactDOM.render (
-      <MyComponent />,
+      <App />,
       document.getElementById('posts-list')
     );
 
