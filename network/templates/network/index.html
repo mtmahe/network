@@ -62,6 +62,62 @@
     }
 
 
+    function PaginationNav(props) {
+      const { error, isLoaded, items } = props.current;
+      var currentPage = props.current.pageNumber;
+      let listPages = [];
+      let pageList = props.current.pageList;
+
+      // Show two pages before, two pages after current.
+      if ((currentPage-2) > 0) {
+        listPages.push(<li key={currentPage-2} className="page-item"><a className="page-link" onClick={props.handleClick.bind(this, currentPage-2)}>{currentPage-2}</a></li>);
+      }
+      if ((currentPage-1) > 0) {
+        listPages.push(<li key={currentPage-1} className="page-item"><a className="page-link" onClick={props.handleClick.bind(this, currentPage-1)}>{currentPage-1}</a></li>);
+      }
+      listPages.push(<li key={currentPage} className="page-item active" aria-current="page">
+        <span className="page-link">
+          {currentPage}
+          <span className="sr-only">(current)</span>
+        </span>
+      </li>);
+      if (pageList.includes(currentPage+1)) {
+        console.log('next page exists');
+        listPages.push(<li key={currentPage+1} className="page-item"><a className="page-link" onClick={props.handleClick.bind(this, currentPage+1)}>{currentPage+1}</a></li>);
+      } else {
+        console.log(`currentPage ${currentPage} pagelist ${pageList}`)
+      }
+      if (pageList.includes(currentPage+2)) {
+        console.log('next page exists');
+        listPages.push(<li key={currentPage+2} className="page-item"><a className="page-link" onClick={props.handleClick.bind(this, currentPage+2)}>{currentPage+2}</a></li>);
+      }
+
+      return (
+        <div id="pagination-div">
+          <nav className="page-nav" aria-label="Page navigation">
+            <ul className="pagination justify-content-center">
+              {props.current.hasPrevious === true &&
+                <li className="page-item">
+                  <a className="page-link" onClick={props.handleClick.bind(this, (currentPage -1))} aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+              }
+              {listPages}
+              {props.current.hasNext === true &&
+                <li className="page-item">
+                  <a className="page-link" onClick={props.handleClick.bind(this, (currentPage +1))} aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          </nav>
+        </div>
+      )
+    }
+
+
     class App extends React.Component {
       constructor(props) {
         super(props);
@@ -76,6 +132,7 @@
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleClick = this.handleClick.bind(this);
       }
 
       handleChange(event) {
@@ -104,8 +161,6 @@
           .then(res => res.json())
           .then(
             (result) => {
-              console.log(result);
-              console.log(`page number ${this.state.pageNumber}`);
               this.setState({
                 isLoaded: true,
                 items: result.pages,
@@ -136,8 +191,6 @@
           .then(res => res.json())
           .then(
             (result) => {
-              console.log(result);
-              console.log(`page number ${this.state.pageNumber}`);
               this.setState({
                 isLoaded: true,
                 items: result.pages,
@@ -160,61 +213,15 @@
       }
 
       render() {
-
-        var currentPage = this.state.pageNumber;
-        let listPages = [];
-        let pageList = this.state.pageList;
-
-        // Show two pages before, two pages after current.
-        var j = currentPage;
-        if ((j-2) > 0) {
-          listPages.push(<li key={j-2} className="page-item"><a className="page-link" onClick={this.handleClick.bind(this, j-2)}>{j-2}</a></li>);
-        }
-        if ((j-1) > 0) {
-          listPages.push(<li key={j-1} className="page-item"><a className="page-link" onClick={this.handleClick.bind(this, j-1)}>{j-1}</a></li>);
-        }
-        listPages.push(<li key={j} className="page-item active" aria-current="page">
-          <span className="page-link">
-            {j}
-            <span className="sr-only">(current)</span>
-          </span>
-        </li>);
-        if (pageList.includes(j+1)) {
-          console.log('next page exists');
-          listPages.push(<li key={j+1} className="page-item"><a className="page-link" onClick={this.handleClick.bind(this, j+1)}>{j+1}</a></li>);
-        } else {
-          console.log(`j ${j} pagelist ${pageList}`)
-        }
-        if (pageList.includes(j+2)) {
-          console.log('next page exists');
-          listPages.push(<li key={j+2} className="page-item"><a className="page-link" onClick={this.handleClick.bind(this, j+2)}>{j+2}</a></li>);
-        }
-
         return(
           <div>
             <NewPostForm handleChange={this.handleChange}
               handleSubmit={this.handleSubmit}
               value={this.formValue}></NewPostForm>
             <OrderedPosts current={this.state}></OrderedPosts>
-            <nav className="page-nav" aria-label="Page navigation">
-              <ul className="pagination justify-content-center">
-                {this.state.hasPrevious === true &&
-                  <li className="page-item">
-                    <a className="page-link" onClick={this.handleClick.bind(this, (currentPage -1))} aria-label="Previous">
-                      <span aria-hidden="true">&laquo;</span>
-                    </a>
-                  </li>
-                }
-                {listPages}
-                {this.state.hasNext === true &&
-                  <li className="page-item">
-                    <a className="page-link" onClick={this.handleClick.bind(this, (currentPage +1))} aria-label="Next">
-                      <span aria-hidden="true">&raquo;</span>
-                    </a>
-                  </li>
-                }
-              </ul>
-            </nav>
+
+            <PaginationNav handleClick={this.handleClick}
+              current={this.state}></PaginationNav>
           </div>
         );
       }

@@ -124,3 +124,9 @@ def query_posts(request, page_number):
 
     #return JsonResponse([post.serialize() for post in posts], safe=False)
     return JsonResponse(current_page, safe=False)
+
+
+def profile(request, user_id):
+    """ user profile information """
+
+    TODO
