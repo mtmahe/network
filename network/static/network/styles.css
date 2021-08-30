@@ -11,9 +11,11 @@
 }
 
 .profile-link-div {
-  background-color: AliceBlue;
-  padding-left: 0.2rem;
   margin-bottom: 0.5rem;
+}
+
+.profile-link-div:hover {
+  background-color: AliceBlue;
 }
 
 ul {
