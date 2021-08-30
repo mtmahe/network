@@ -201,3 +201,17 @@ ReactDOM.render (
   <MyComponent />,
   document.getElementById('posts-list')
 );
+
+
+
+
+//function ProfileView(props) {
+//  return (
+//    <div id="profile-div" className="section-container">
+//      <h4>Followers</h4>
+//      <p>posts</p>
+//      <button type="button" name="button"
+//        className="btn btn-secondary" onClick={props.handleFollowClick.bind(this)}>Follow Button</button>
+//    </div>
+//  )
+//}

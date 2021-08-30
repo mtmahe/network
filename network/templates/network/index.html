@@ -118,14 +118,33 @@
     }
 
 
-    function ProfileView(props) {
-      return (
-        <div id="profile-div" className="section-container">
-          <h4>Followers</h4>
-          <p>posts</p>
-          <button type="button" name="button">Follow Button</button>
-        </div>
-      )
+    class ProfileView extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          isFollowed: false,
+        };
+      }
+
+      handleFollowClick(event) {
+        console.log("Follow clicked")
+      }
+
+      render() {
+        return (
+          // Hi
+          <div id="profile-div" className="section-container">
+            <h4>Followers: 0</h4>
+            <h4>Following: 0</h4>
+            <p>posts</p>
+            {(this.state.isFollowed) ? <button type="button" name="button"
+              className="btn btn-secondary" onClick={this.handleFollowClick.bind(this)}>Unfollow</button>:
+              <button type="button" name="button"
+                className="btn btn-secondary" onClick={this.handleFollowClick.bind(this)}>Follow</button>
+            }
+          </div>
+        );
+      }
     }
 
 
@@ -231,8 +250,6 @@
         });
       }
 
-      //
-
       render() {
         console.log(`state is ${this.state.currentView}`)
         if (this.state.currentView == "all") {
@@ -251,7 +268,7 @@
         } else {
           return(
             <div>
-              <ProfileView></ProfileView>
+              <ProfileView handleFollowClick={this.handleFollowClick}></ProfileView>
             </div>
           );
         }

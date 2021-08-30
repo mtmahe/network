@@ -133,6 +133,10 @@ def profile(request, user):
 
     objects = [follow.serialize() for follow in follows]
 
-
-
     return JsonResponse(objects, safe=False)
+
+
+def follow(request):
+    """ Follow or unfollow """
+
+    Todo
