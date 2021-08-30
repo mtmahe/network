@@ -49,7 +49,9 @@
             <ul>
               {props.current.items.map(item => (
                 <li className="section-container" key={item.id}>
-                  <strong><a className="profile-link" onClick={props.handleProfileClick.bind(this, 1)}>{item.owner}</a></strong>
+                  <div className="profile-link-div" onClick={props.handleProfileClick.bind(this, 1)}>
+                    <strong>{item.owner}</strong>
+                  </div>
                   <p>{item.body}</p>
                   <small>{item.timestamp}</small>
                   <p>likes</p>

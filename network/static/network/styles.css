@@ -10,6 +10,12 @@
   padding: 1em;
 }
 
+.profile-link-div {
+  background-color: AliceBlue;
+  padding-left: 0.2rem;
+  margin-bottom: 0.5rem;
+}
+
 ul {
   list-style: none;
   margin: 0;
