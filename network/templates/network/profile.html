@@ -1,0 +1,55 @@
+% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+  <div class="main-container">
+    <div id="profile-div"></div>
+  </div>
+
+  <!-- Get csrf token -->
+  <script src="{% static 'network/cookie.js' %}"></script>
+
+  <script type="text/babel">
+
+
+    class App extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          formValue: '',
+          error: null,
+          isLoaded: false,
+          items: [],
+          pageList: [],
+          pageNumber: 1
+        };
+
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleClick = this.handleClick.bind(this);
+      }
+
+      render() {
+        return(
+          <div>
+            <NewPostForm handleChange={this.handleChange}
+              handleSubmit={this.handleSubmit}
+              value={this.formValue}></NewPostForm>
+            <OrderedPosts current={this.state}></OrderedPosts>
+
+            <PaginationNav handleClick={this.handleClick}
+              current={this.state}></PaginationNav>
+          </div>
+        );
+      }
+    }
+
+
+    ReactDOM.render (
+      <App />,
+      document.getElementById('profile-div')
+    );
+
+
+  </script>
+{% endblock %}

@@ -49,7 +49,7 @@
             <ul>
               {props.current.items.map(item => (
                 <li className="section-container" key={item.id}>
-                  <strong>{item.owner}</strong>
+                  <strong><a className="profile-link" onClick={props.handleProfileClick.bind(this, 1)}>{item.owner}</a></strong>
                   <p>{item.body}</p>
                   <small>{item.timestamp}</small>
                   <p>likes</p>
@@ -82,13 +82,11 @@
         </span>
       </li>);
       if (pageList.includes(currentPage+1)) {
-        console.log('next page exists');
         listPages.push(<li key={currentPage+1} className="page-item"><a className="page-link" onClick={props.handleClick.bind(this, currentPage+1)}>{currentPage+1}</a></li>);
       } else {
         console.log(`currentPage ${currentPage} pagelist ${pageList}`)
       }
       if (pageList.includes(currentPage+2)) {
-        console.log('next page exists');
         listPages.push(<li key={currentPage+2} className="page-item"><a className="page-link" onClick={props.handleClick.bind(this, currentPage+2)}>{currentPage+2}</a></li>);
       }
 
@@ -118,6 +116,17 @@
     }
 
 
+    function ProfileView(props) {
+      return (
+        <div id="profile-div" className="section-container">
+          <h4>Followers</h4>
+          <p>posts</p>
+          <button type="button" name="button">Follow Button</button>
+        </div>
+      )
+    }
+
+
     class App extends React.Component {
       constructor(props) {
         super(props);
@@ -127,12 +136,14 @@
           isLoaded: false,
           items: [],
           pageList: [],
-          pageNumber: 1
+          pageNumber: 1,
+          currentView: "all",
         };
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleClick = this.handleClick.bind(this);
+        this.handleProfileClick = this.handleProfileClick.bind(this);
       }
 
       handleChange(event) {
@@ -212,18 +223,36 @@
           )
       }
 
-      render() {
-        return(
-          <div>
-            <NewPostForm handleChange={this.handleChange}
-              handleSubmit={this.handleSubmit}
-              value={this.formValue}></NewPostForm>
-            <OrderedPosts current={this.state}></OrderedPosts>
+      handleProfileClick(index) {
+        this.setState({
+          currentView: index,
+        });
+      }
 
-            <PaginationNav handleClick={this.handleClick}
-              current={this.state}></PaginationNav>
-          </div>
-        );
+      //
+
+      render() {
+        console.log(`state is ${this.state.currentView}`)
+        if (this.state.currentView == "all") {
+          return(
+            <div>
+              <NewPostForm handleChange={this.handleChange}
+                handleSubmit={this.handleSubmit}
+                value={this.formValue}></NewPostForm>
+              <OrderedPosts current={this.state}
+                handleProfileClick={this.handleProfileClick}></OrderedPosts>
+
+              <PaginationNav handleClick={this.handleClick}
+                current={this.state}></PaginationNav>
+            </div>
+          );
+        } else {
+          return(
+            <div>
+              <ProfileView></ProfileView>
+            </div>
+          );
+        }
       }
     }
 
