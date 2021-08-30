@@ -136,7 +136,36 @@ def profile(request, user):
     return JsonResponse(objects, safe=False)
 
 
+@csrf_exempt
 def follow(request):
     """ Follow or unfollow """
 
-    Todo
+    if request.method != "POST":
+        print('not post')
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    # Get contents of post
+    print('follow request')
+    data = json.loads(request.body)
+    user = request.user.pk
+    followed = data.get("followed", "")
+    followed = User.objects.get(pk=followed)
+    print(f'The user is {user}, followed is {followed}')
+
+    result = Follow.objects.filter(follower=user).filter(followed=followed)
+
+    if not result:
+        follow = Follow(
+            follower=request.user,
+            followed=followed
+        )
+        follow.save()
+
+        return JsonResponse({"success": "user followed"})
+
+    else:
+        print('unfollowing')
+        result.delete()
+
+
+    return JsonResponse({"success": "user unfollowed"})

@@ -123,11 +123,29 @@
         super(props);
         this.state = {
           isFollowed: false,
+          profile_id: props.profile_id
         };
       }
 
       handleFollowClick(event) {
         console.log("Follow clicked")
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+          },
+          body: JSON.stringify({
+            followed: this.state.profile_id
+          })
+        };
+        fetch('/profile/follow', requestOptions)
+          .then(response => response.json())
+          .then(result => {
+            console.log(result);
+            console.log(`user is ${this.state.user}`)
+          })
+        //alert('Data was sent');
+        event.preventDefault();
       }
 
       render() {
@@ -268,7 +286,9 @@
         } else {
           return(
             <div>
-              <ProfileView handleFollowClick={this.handleFollowClick}></ProfileView>
+              <ProfileView
+                profile_id={this.state.currentView}
+                handleFollowClick={this.handleFollowClick}></ProfileView>
             </div>
           );
         }

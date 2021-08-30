@@ -23,10 +23,10 @@ class Post(models.Model):
 class Follow(models.Model):
     follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following_user")
     followed = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following_followed")
-    active = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.follower.username} is following {self.followed.username}."
+
 
 # another for likes
 # another for comments
