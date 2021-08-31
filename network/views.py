@@ -219,3 +219,19 @@ def query_followers(request, user_pk):
     followed_json = json.dumps(followed_total)
 
     return JsonResponse(followed_json, safe=False)
+
+
+def query_name(request, user_pk):
+    """ Get the username given pk """
+
+    if request.method != "GET":
+        print('not get')
+        return JsonResponse({"error": "GET request required."}, status=400)
+
+    result = User.objects.get(pk=user_pk)
+    name = result.username
+    body = {
+        "name": name,
+    }
+
+    return JsonResponse(body)

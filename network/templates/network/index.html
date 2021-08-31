@@ -176,6 +176,35 @@
     }
 
 
+    // The username
+    class QueryUsername extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          profile_id: props.profile_id,
+          username: "",
+        };
+      }
+
+      componentDidMount() {
+        fetch(`/profile/name/${this.state.profile_id}`)
+          .then(response => response.json())
+          .then(result => {
+            this.setState({
+              username: result.name,
+            });
+          })
+          event.preventDefault();
+        }
+
+      render() {
+        return (
+          <h3>{this.state.username}</h3>
+        );
+      }
+    }
+
+
     class ProfileView extends React.Component {
       constructor(props) {
         super(props);
@@ -235,15 +264,21 @@
       render() {
         return (
           // Hi
-          <div id="profile-div" className="section-container">
-            <QueryFollows profile_id={this.state.profile_id}></QueryFollows>
-            <QueryFollowers profile_id={this.state.profile_id}></QueryFollowers>
-            <p>posts</p>
-            {(this.state.isFollowed) ? <button type="button" name="button"
-              className="btn btn-secondary" onClick={this.handleFollowClick.bind(this)}>Unfollow</button>:
-              <button type="button" name="button"
-                className="btn btn-secondary" onClick={this.handleFollowClick.bind(this)}>Follow</button>
-            }
+          <div id="profile-div">
+            <div className="section-container">
+              <QueryUsername profile_id={this.state.profile_id}></QueryUsername>
+              <QueryFollows profile_id={this.state.profile_id}></QueryFollows>
+              <QueryFollowers profile_id={this.state.profile_id}></QueryFollowers>
+              {(this.state.isFollowed) ? <button type="button" name="button"
+                className="btn btn-secondary" onClick={this.handleFollowClick.bind(this)}>Unfollow</button>:
+                <button type="button" name="button"
+                  className="btn btn-secondary" onClick={this.handleFollowClick.bind(this)}>Follow</button>
+              }
+            </div>
+            <div className="section-container">
+              posts
+            </div>
+
           </div>
         );
       }
