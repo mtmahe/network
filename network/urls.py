@@ -15,4 +15,5 @@ urlpatterns = [
     path("posts/all/<int:page_number>", views.query_posts, name="query_posts_paginated"),
     path("profile/<int:user>", views.profile, name="query_profile"),
     path("profile/follow", views.follow, name="follow"),
+    path("profile/isfollowing/<int:followed_id>", views.is_following, name="query_following"),
 ]

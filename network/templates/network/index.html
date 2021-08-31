@@ -36,7 +36,7 @@
 
 
     function OrderedPosts(props) {
-      console.log(props);
+      // console.log(props);
       if (props.current.error) {
         return <div>Error: {props.current.error.message}</div>;
       } else if (!props.current.isLoaded) {
@@ -86,7 +86,7 @@
       if (pageList.includes(currentPage+1)) {
         listPages.push(<li key={currentPage+1} className="page-item"><a className="page-link" onClick={props.handleClick.bind(this, currentPage+1)}>{currentPage+1}</a></li>);
       } else {
-        console.log(`currentPage ${currentPage} pagelist ${pageList}`)
+        // console.log(`currentPage ${currentPage} pagelist ${pageList}`)
       }
       if (pageList.includes(currentPage+2)) {
         listPages.push(<li key={currentPage+2} className="page-item"><a className="page-link" onClick={props.handleClick.bind(this, currentPage+2)}>{currentPage+2}</a></li>);
@@ -125,10 +125,27 @@
           isFollowed: false,
           profile_id: props.profile_id
         };
+
+        this.handleFollowClick = this.handleFollowClick.bind(this);
+      }
+
+      componentDidMount() {
+        fetch(`/profile/isfollowing/${this.state.profile_id}`)
+          .then(response => response.json())
+          .then(result => {
+            console.log(`didmount result ${result.followed}`);
+            if (result.followed == "true") {
+              this.setState({
+                isFollowed: true,
+              });
+            }
+          })
+        //alert('Data was sent');
+        event.preventDefault();
       }
 
       handleFollowClick(event) {
-        console.log("Follow clicked")
+        console.log(`${this.state.isFollowed}`);
         const requestOptions = {
           method: 'POST',
           headers: { 'Content-Type': 'application/json',
@@ -141,9 +158,16 @@
         fetch('/profile/follow', requestOptions)
           .then(response => response.json())
           .then(result => {
-            console.log(result);
-            console.log(`user is ${this.state.user}`)
           })
+          if (this.state.isFollowed === true) {
+            this.setState({
+              isFollowed: false,
+            });
+          } else {
+            this.setState({
+              isFollowed: true,
+            });
+          };
         //alert('Data was sent');
         event.preventDefault();
       }
@@ -200,7 +224,7 @@
         fetch('/posts/compose', requestOptions)
           .then(response => response.json())
           .then(result => {
-            console.log(result);
+            // console.log(result);
           })
         alert('A post was submitted: ' + this.state.value);
         //event.preventDefault();
@@ -269,7 +293,7 @@
       }
 
       render() {
-        console.log(`state is ${this.state.currentView}`)
+        // console.log(`state is ${this.state.currentView}`)
         if (this.state.currentView == "all") {
           return(
             <div>

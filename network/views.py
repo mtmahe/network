@@ -163,9 +163,25 @@ def follow(request):
 
         return JsonResponse({"success": "user followed"})
 
-    else:
-        print('unfollowing')
-        result.delete()
-
+    print('unfollowing')
+    result.delete()
 
     return JsonResponse({"success": "user unfollowed"})
+
+
+def is_following(request, followed_id):
+    """ Check if user is following profile owner """
+
+    if request.method != "GET":
+        print('not get')
+        return JsonResponse({"error": "GET request required."}, status=400)
+
+    user = request.user.pk
+    followed = followed_id
+
+    result = Follow.objects.filter(follower=user).filter(followed=followed)
+
+    if not result:
+        return JsonResponse({"followed": "false"})
+
+    return JsonResponse({"followed": "true"})
