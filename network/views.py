@@ -185,3 +185,37 @@ def is_following(request, followed_id):
         return JsonResponse({"followed": "false"})
 
     return JsonResponse({"followed": "true"})
+
+
+def query_following(request, user_pk):
+    """ Get a list of whom the user is following """
+
+    if request.method != "GET":
+        print('not get')
+        return JsonResponse({"error": "GET request required."}, status=400)
+
+    result = Follow.objects.filter(follower=user_pk)
+    follows = [follow.followed.pk for follow in result]
+    follows_total = 0;
+    for i in follows:
+        follows_total += i
+    follows_json = json.dumps(follows_total)
+
+    return JsonResponse(follows_json, safe=False)
+
+
+def query_followers(request, user_pk):
+    """ Get a list of whom the user is followed by. """
+
+    if request.method != "GET":
+        print('not get')
+        return JsonResponse({"error": "GET request required."}, status=400)
+
+    result = Follow.objects.filter(followed=user_pk)
+    followed = [follow.followed.pk for follow in result]
+    followed_total = 0;
+    for i in followed:
+        followed_total += i
+    followed_json = json.dumps(followed_total)
+
+    return JsonResponse(followed_json, safe=False)

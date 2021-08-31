@@ -49,7 +49,7 @@
             <ul>
               {props.current.items.map(item => (
                 <li className="section-container" key={item.id}>
-                  <div className="profile-link-div" onClick={props.handleProfileClick.bind(this, 1)}>
+                  <div className="profile-link-div" onClick={props.handleProfileClick.bind(this, `${item.owner_pk}`)}>
                     <strong>{item.owner}</strong>
                   </div>
                   <p>{item.body}</p>
@@ -118,6 +118,64 @@
     }
 
 
+    // The number of people they are following.
+    class QueryFollows extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          profile_id: props.profile_id,
+          follow_amount: 0,
+        };
+      }
+
+      componentDidMount() {
+        fetch(`/profile/follows/${this.state.profile_id}`)
+          .then(response => response.json())
+          .then(result => {
+            this.setState({
+              follow_amount: result,
+            });
+          })
+          event.preventDefault();
+        }
+
+      render() {
+        return (
+          <h4>Following: {this.state.follow_amount}</h4>
+        );
+      }
+    }
+
+
+    // The number of people following them
+    class QueryFollowers extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          profile_id: props.profile_id,
+          followers_amount: 0,
+        };
+      }
+
+      componentDidMount() {
+        fetch(`/profile/followers/${this.state.profile_id}`)
+          .then(response => response.json())
+          .then(result => {
+            this.setState({
+              followers_amount: result,
+            });
+          })
+          event.preventDefault();
+        }
+
+      render() {
+        return (
+          <h4>Followers: {this.state.followers_amount}</h4>
+        );
+      }
+    }
+
+
     class ProfileView extends React.Component {
       constructor(props) {
         super(props);
@@ -125,11 +183,13 @@
           isFollowed: false,
           profile_id: props.profile_id
         };
+        console.log(`prof id ${this.state.profile_id}`)
 
         this.handleFollowClick = this.handleFollowClick.bind(this);
       }
 
       componentDidMount() {
+        // const res = queryFollows(this.state);
         fetch(`/profile/isfollowing/${this.state.profile_id}`)
           .then(response => response.json())
           .then(result => {
@@ -176,8 +236,8 @@
         return (
           // Hi
           <div id="profile-div" className="section-container">
-            <h4>Followers: 0</h4>
-            <h4>Following: 0</h4>
+            <QueryFollows profile_id={this.state.profile_id}></QueryFollows>
+            <QueryFollowers profile_id={this.state.profile_id}></QueryFollowers>
             <p>posts</p>
             {(this.state.isFollowed) ? <button type="button" name="button"
               className="btn btn-secondary" onClick={this.handleFollowClick.bind(this)}>Unfollow</button>:

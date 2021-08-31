@@ -215,3 +215,25 @@ ReactDOM.render (
 //    </div>
 //  )
 //}
+
+
+
+
+
+    function QueryFollows(props) {
+      var res = 0;
+      console.log(`profile_id is ${props.profile_id}`);
+      fetch(`/profile/follows/${props.profile_id}`)
+        .then(response => response.json())
+        .then(result => {
+          console.log(`queryFollows result ${result}`);
+          var res = {result};
+        })
+
+      //alert('Data was sent');
+      event.preventDefault();
+
+      return (
+        <p>{result}</p>
+      )
+    }

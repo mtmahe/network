@@ -15,6 +15,7 @@ class Post(models.Model):
         return {
             "id": self.id,
             "owner": self.user.username,
+            "owner_pk": self.user.pk,
             "body": self.body,
             "timestamp": self.timestamp.strftime("%b %d %Y, %I:%M %p"),
         }
