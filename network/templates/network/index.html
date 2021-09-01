@@ -190,10 +190,17 @@
         fetch(`/profile/name/${this.state.profile_id}`)
           .then(response => response.json())
           .then(result => {
+            console.log(result)
             this.setState({
               username: result.name,
             });
-          })
+          },
+          (error) => {
+            console.log(error);
+            this.setState({
+              error
+            });
+          });
           event.preventDefault();
         }
 
@@ -202,6 +209,60 @@
           <h3>{this.state.username}</h3>
         );
       }
+    }
+
+
+    class QueryUserPosts extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          isLoaded: false,
+          items: [],
+          pageList: [],
+          hasNext: false,
+          hasPrevious: false,
+          numPages: 0,
+          profile_id: props.profile_id,
+        }
+      }
+
+      componentDidMount() {
+        fetch(`/posts/${this.state.profile_id}/1`)
+          .then(response => response.json())
+          .then(result => {
+            console.log(result)
+            this.setState({
+              isLoaded: true,
+              items: result.pages,
+              pageList: result.page_list,
+              hasNext: result.has_next,
+              hasPrevious: result.has_previous,
+              numPages: result.num_pages,
+            });
+          },
+          (error) => {
+            console.log(error);
+            this.setState({
+              error
+            });
+          });
+          event.preventDefault();
+        }
+
+        handleProfileClick(index) {
+          this.setState({
+            currentView: index,
+          });
+        }
+
+        render () {
+          return(
+            <div id="user-posts">
+              <OrderedPosts current={this.state}
+                handleProfileClick={this.handleProfileClick.bind(this)}></OrderedPosts>
+            </div>
+          );
+        }
     }
 
 
@@ -275,8 +336,8 @@
                   className="btn btn-secondary" onClick={this.handleFollowClick.bind(this)}>Follow</button>
               }
             </div>
-            <div className="section-container">
-              posts
+            <div>
+              <QueryUserPosts profile_id={this.state.profile_id}></QueryUserPosts>
             </div>
 
           </div>

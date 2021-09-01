@@ -124,6 +124,35 @@ def query_posts(request, page_number):
     return JsonResponse(current_page, safe=False)
 
 
+def query_user_posts(request, user_pk, page_number):
+    """ Get all posts """
+
+    if not page_number:
+        page_number = 1
+
+    current_page = {}
+
+    # posts = Post.objects.all()
+    posts = Post.objects.filter(user=user_pk).order_by("-id")
+
+    # Pagination
+    objects = [post.serialize() for post in posts]
+
+    p = Paginator(objects, 10)
+    current_page["pages"] = p.page(page_number).object_list
+    page_list = []
+    for i in range(p.num_pages):
+        page_list.append(i+1)
+    current_page["page_list"] = page_list
+    current_page["has_next"] = p.page(page_number).has_next()
+    current_page["has_previous"] = p.page(page_number).has_previous()
+    current_page["num_pages"] = p.num_pages
+
+
+    #return JsonResponse([post.serialize() for post in posts], safe=False)
+    return JsonResponse(current_page, safe=False)
+
+
 def profile(request, user):
     """ Display user profile """
 
