@@ -3,7 +3,7 @@ import json
 from django.test import Client, TestCase
 
 from .models import User, Post
-from .views import query_posts, compose
+from .views import query_posts
 
 # Create your tests here.
 class PostTestCase(TestCase):
@@ -46,5 +46,4 @@ class PostTestCase(TestCase):
 
         response = self.client.get("/posts/all")
         json_data = json.loads(response.content)
-        print(response.content)
         self.assertEqual(json_data[0]['body'], 'foo')
