@@ -125,7 +125,7 @@ def query_posts(request, page_number):
 
 
 def query_user_posts(request, user_pk, page_number):
-    """ Get all posts """
+    """ Get all posts by user. """
 
     if not page_number:
         page_number = 1
@@ -264,3 +264,9 @@ def query_name(request, user_pk):
     }
 
     return JsonResponse(body)
+
+
+def view_following(request):
+    """ show posts for only users being followed """
+
+    return render(request, "network/following.html")
