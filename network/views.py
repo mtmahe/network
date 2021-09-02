@@ -95,33 +95,37 @@ def compose(request):
 
 
 @csrf_exempt
-def query_posts(request, page_number):
-    """ Get all posts """
+def query_posts(request):
+    """ Get selected posts """
 
-    if not page_number:
-        page_number = 1
+    # check usage is Post
+    if request.method != "GET":
+        print('not get')
+        return JsonResponse({"error": "GET request required."}, status=400)
 
-    current_page = {}
+    if request.headers['authors'] == 'all':
+        posts = Post.objects.all().order_by("-id")
 
-    # posts = Post.objects.all()
-    posts = Post.objects.all().order_by("-id")
-
-    # Pagination
+    # Create paginated json for response
+    my_posts = {}
     objects = [post.serialize() for post in posts]
 
     p = Paginator(objects, 10)
-    current_page["pages"] = p.page(page_number).object_list
-    page_list = []
-    for i in range(p.num_pages):
-        page_list.append(i+1)
-    current_page["page_list"] = page_list
-    current_page["has_next"] = p.page(page_number).has_next()
-    current_page["has_previous"] = p.page(page_number).has_previous()
-    current_page["num_pages"] = p.num_pages
+    my_posts['p_count'] = p.count
+    my_posts['num_pages'] = p.num_pages
 
+    # make a dictionary of each page and its variables
+    pages = {}
+    for i in range(p.num_pages):
+        pages['{0}'.format(i+1)] = {
+            'page_list': p.page(i+1).object_list,
+            'has_next': p.page(i+1).has_next(),
+            'has_previous': p.page(i+1).has_previous()
+        }
+    my_posts['pages'] = pages
 
     #return JsonResponse([post.serialize() for post in posts], safe=False)
-    return JsonResponse(current_page, safe=False)
+    return JsonResponse(my_posts, safe=False)
 
 
 def query_user_posts(request, user_pk, page_number):
