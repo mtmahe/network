@@ -1,55 +1,41 @@
-% extends "network/layout.html" %}
+{% extends "network/layout.html" %}
 {% load static %}
 
 {% block body %}
   <div class="main-container">
-    <div id="profile-div"></div>
+    <h3 id="title">Title</h3>
+
+    <div class="section-container" id="profile-view">
+      <p>followers</p>
+      <p>following</p>
+      <p>posts</p>
+    </div>
+
+    <div id="posts-view">
+      <div id="paginate-posts"></div>
+      <div id="paginate-nav">
+        <nav aria-label="posts page selector">
+          <ul id="pagination-ul" class="pagination justify-content-center">
+            <li class="page-item">
+              <a id="btn-previous" class="page-link" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            <li class="page-item disabled">
+              <a id="btn-current" class="page-link" aria-label="current-page"></a>
+            </li>
+            <li class="page-item">
+              <a id="btn-next" class="page-link" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
   </div>
+{% endblock %}
 
-  <!-- Get csrf token -->
-  <script src="{% static 'network/cookie.js' %}"></script>
-
-  <script type="text/babel">
-
-
-    class App extends React.Component {
-      constructor(props) {
-        super(props);
-        this.state = {
-          formValue: '',
-          error: null,
-          isLoaded: false,
-          items: [],
-          pageList: [],
-          pageNumber: 1
-        };
-
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleClick = this.handleClick.bind(this);
-      }
-
-      render() {
-        return(
-          <div>
-            <NewPostForm handleChange={this.handleChange}
-              handleSubmit={this.handleSubmit}
-              value={this.formValue}></NewPostForm>
-            <OrderedPosts current={this.state}></OrderedPosts>
-
-            <PaginationNav handleClick={this.handleClick}
-              current={this.state}></PaginationNav>
-          </div>
-        );
-      }
-    }
-
-
-    ReactDOM.render (
-      <App />,
-      document.getElementById('profile-div')
-    );
-
-
-  </script>
+{% block script %}
+  <script src="{% static 'network/profile.js' %}"></script>
 {% endblock %}

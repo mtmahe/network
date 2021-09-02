@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-  load_dashboard('all_posts');
+
+  load_dashboard('profile');
 });
 
 function load_dashboard(posts_type) {
@@ -9,33 +10,8 @@ function load_dashboard(posts_type) {
   let title = return_title(posts_type);
   console.log(title);
 
-  // Show the dashboard and hide the others
-  document.querySelector('#new-post-view').style.display = 'block';
-  document.querySelector('#posts-view').style.display = 'block';
-
   // Show the dashboard name
   document.querySelector('#title').innerHTML = `<h3>${title}</h3>`;
-
-  // Create the new post view
-  document.querySelector('#new-post-body').value = '';
-
-  // Submit new post
-  document.querySelector('form').onsubmit = () => {
-    console.log('submitting');
-    fetch('/posts/compose', {
-      method: 'POST',
-      body: JSON.stringify({
-        body: document.querySelector('#new-post-body').value,
-      })
-    })
-    .then(response => response.json())
-    .then(result => {
-      console.log(result);
-      load_dashboard('all_posts');
-    })
-
-    return false;
-  }
 
   createPostsView('1');
 
@@ -71,9 +47,6 @@ function load_dashboard(posts_type) {
         node = document.createTextNode(item.owner);
         owner.append(node)
         next_post.appendChild(owner);
-        owner.addEventListener('click', function() {
-          window.location.href=`/profile/${item.owner}`;
-        })
 
         const body = document.createElement('p');
         node = document.createTextNode(item.body);

@@ -166,7 +166,9 @@ def profile(request, user):
 
     objects = [follow.serialize() for follow in follows]
 
-    return JsonResponse(objects, safe=False)
+    return render(request, "network/profile.html", {
+        "objects": objects,
+    })
 
 
 @csrf_exempt
