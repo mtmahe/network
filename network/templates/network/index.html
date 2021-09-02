@@ -3,21 +3,485 @@
 
 {% block body %}
   <div class="main-container">
-    <h3 id="title">Title</h3>
-    <div class="section-container" id="new-post-view">
-      <h5>New Post</h5>
-      <form id="new-post-form">
-        <!-- {% csrf_token %} -->
-        <textarea class="form-control" id="new-post-body" rows="2" cols="80"></textarea>
-        <input type="submit" value="Post" class="btn btn-primary">
-      </form>
-    </div>
+    <div id="new-post"></div>
 
-    <div id="posts-view">
-    </div>
+    <div id="posts-list"></div>
+
+    <div id="profile-div"></div>
+
+    <div id="edit-div"></div>
   </div>
-{% endblock %}
 
-{% block script %}
-  <script src="{% static 'network/index.js' %}"></script>
+  <!-- Get csrf token -->
+  <script src="{% static 'network/cookie.js' %}"></script>
+
+  <script type="text/babel">
+
+
+    function NewPostForm(props) {
+      return (
+        <div className="section-container" id="new-post-view">
+          <form onSubmit={props.handleSubmit}>
+            <h5 id="title">New Post: </h5>
+            <textarea
+              className="form-control"
+              value={props.value}
+              onChange={props.handleChange}
+            />
+            <input type="submit" className="btn btn-primary" value="Post" />
+          </form>
+        </div>
+      );
+    }
+
+
+    function OrderedPosts(props) {
+      // console.log(props);
+      if (props.current.error) {
+        return <div>Error: {props.current.error.message}</div>;
+      } else if (!props.current.isLoaded) {
+        return <div>Loading...</div>;
+      } else {
+        return (
+
+          // The posts go here
+          <div className="posts-container">
+            <ul>
+              {props.current.items.map(item => (
+                <li className="section-container" key={item.id}>
+                  <div className="profile-link-div" onClick={props.handleProfileClick.bind(this, `${item.owner_pk}`)}>
+                    <strong>{item.owner}</strong>
+                  </div>
+                  <p>{item.body}</p>
+                  <small>{item.timestamp}</small>
+                  <p>likes</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    }
+
+
+    function PaginationNav(props) {
+      const { error, isLoaded, items } = props.current;
+      var currentPage = props.current.pageNumber;
+      let listPages = [];
+      let pageList = props.current.pageList;
+
+      // Show two pages before, two pages after current.
+      if ((currentPage-2) > 0) {
+        listPages.push(<li key={currentPage-2} className="page-item"><a className="page-link" onClick={props.handleClick.bind(this, currentPage-2)}>{currentPage-2}</a></li>);
+      }
+      if ((currentPage-1) > 0) {
+        listPages.push(<li key={currentPage-1} className="page-item"><a className="page-link" onClick={props.handleClick.bind(this, currentPage-1)}>{currentPage-1}</a></li>);
+      }
+      listPages.push(<li key={currentPage} className="page-item active" aria-current="page">
+        <span className="page-link">
+          {currentPage}
+          <span className="sr-only">(current)</span>
+        </span>
+      </li>);
+      if (pageList.includes(currentPage+1)) {
+        listPages.push(<li key={currentPage+1} className="page-item"><a className="page-link" onClick={props.handleClick.bind(this, currentPage+1)}>{currentPage+1}</a></li>);
+      } else {
+        // console.log(`currentPage ${currentPage} pagelist ${pageList}`)
+      }
+      if (pageList.includes(currentPage+2)) {
+        listPages.push(<li key={currentPage+2} className="page-item"><a className="page-link" onClick={props.handleClick.bind(this, currentPage+2)}>{currentPage+2}</a></li>);
+      }
+
+      return (
+        <div id="pagination-div">
+          <nav className="page-nav" aria-label="Page navigation">
+            <ul className="pagination justify-content-center">
+              {props.current.hasPrevious === true &&
+                <li className="page-item">
+                  <a className="page-link" onClick={props.handleClick.bind(this, (currentPage -1))} aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+              }
+              {listPages}
+              {props.current.hasNext === true &&
+                <li className="page-item">
+                  <a className="page-link" onClick={props.handleClick.bind(this, (currentPage +1))} aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          </nav>
+        </div>
+      )
+    }
+
+
+    // The number of people they are following.
+    class QueryFollows extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          profile_id: props.profile_id,
+          follow_amount: 0,
+        };
+      }
+
+      componentDidMount() {
+        fetch(`/profile/follows/${this.state.profile_id}`)
+          .then(response => response.json())
+          .then(result => {
+            this.setState({
+              follow_amount: result,
+            });
+          })
+          event.preventDefault();
+        }
+
+      render() {
+        return (
+          <h4>Following: {this.state.follow_amount}</h4>
+        );
+      }
+    }
+
+
+    // The number of people following them
+    class QueryFollowers extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          profile_id: props.profile_id,
+          followers_amount: 0,
+        };
+      }
+
+      componentDidMount() {
+        fetch(`/profile/followers/${this.state.profile_id}`)
+          .then(response => response.json())
+          .then(result => {
+            this.setState({
+              followers_amount: result,
+            });
+          })
+          event.preventDefault();
+        }
+
+      render() {
+        return (
+          <h4>Followers: {this.state.followers_amount}</h4>
+        );
+      }
+    }
+
+
+    // The username
+    class QueryUsername extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          profile_id: props.profile_id,
+          username: "",
+        };
+      }
+
+      componentDidMount() {
+        fetch(`/profile/name/${this.state.profile_id}`)
+          .then(response => response.json())
+          .then(result => {
+            console.log(result)
+            this.setState({
+              username: result.name,
+            });
+          },
+          (error) => {
+            console.log(error);
+            this.setState({
+              error
+            });
+          });
+          event.preventDefault();
+        }
+
+      render() {
+        return (
+          <h3>{this.state.username}</h3>
+        );
+      }
+    }
+
+
+    class QueryUserPosts extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          isLoaded: false,
+          items: [],
+          pageList: [],
+          hasNext: false,
+          hasPrevious: false,
+          numPages: 0,
+          profile_id: props.profile_id,
+        }
+      }
+
+      componentDidMount() {
+        fetch(`/posts/${this.state.profile_id}/1`)
+          .then(response => response.json())
+          .then(result => {
+            console.log(result)
+            this.setState({
+              isLoaded: true,
+              items: result.pages,
+              pageList: result.page_list,
+              hasNext: result.has_next,
+              hasPrevious: result.has_previous,
+              numPages: result.num_pages,
+            });
+          },
+          (error) => {
+            console.log(error);
+            this.setState({
+              error
+            });
+          });
+          event.preventDefault();
+        }
+
+        handleProfileClick(index) {
+          this.setState({
+            currentView: index,
+          });
+        }
+
+        render () {
+          return(
+            <div id="user-posts">
+              <OrderedPosts current={this.state}
+                handleProfileClick={this.handleProfileClick.bind(this)}></OrderedPosts>
+            </div>
+          );
+        }
+    }
+
+
+    class ProfileView extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          isFollowed: false,
+          profile_id: props.profile_id
+        };
+        console.log(`prof id ${this.state.profile_id}`)
+
+        this.handleFollowClick = this.handleFollowClick.bind(this);
+      }
+
+      componentDidMount() {
+        // const res = queryFollows(this.state);
+        fetch(`/profile/isfollowing/${this.state.profile_id}`)
+          .then(response => response.json())
+          .then(result => {
+            console.log(`didmount result ${result.followed}`);
+            if (result.followed == "true") {
+              this.setState({
+                isFollowed: true,
+              });
+            }
+          })
+        //alert('Data was sent');
+        event.preventDefault();
+      }
+
+      handleFollowClick(event) {
+        console.log(`${this.state.isFollowed}`);
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+          },
+          body: JSON.stringify({
+            followed: this.state.profile_id
+          })
+        };
+        fetch('/profile/follow', requestOptions)
+          .then(response => response.json())
+          .then(result => {
+          })
+          if (this.state.isFollowed === true) {
+            this.setState({
+              isFollowed: false,
+            });
+          } else {
+            this.setState({
+              isFollowed: true,
+            });
+          };
+        //alert('Data was sent');
+        event.preventDefault();
+      }
+
+      render() {
+        return (
+          // Hi
+          <div id="profile-div">
+            <div className="section-container">
+              <QueryUsername profile_id={this.state.profile_id}></QueryUsername>
+              <QueryFollows profile_id={this.state.profile_id}></QueryFollows>
+              <QueryFollowers profile_id={this.state.profile_id}></QueryFollowers>
+              {(this.state.isFollowed) ? <button type="button" name="button"
+                className="btn btn-secondary" onClick={this.handleFollowClick.bind(this)}>Unfollow</button>:
+                <button type="button" name="button"
+                  className="btn btn-secondary" onClick={this.handleFollowClick.bind(this)}>Follow</button>
+              }
+            </div>
+            <div>
+              <QueryUserPosts profile_id={this.state.profile_id}></QueryUserPosts>
+            </div>
+
+          </div>
+        );
+      }
+    }
+
+
+    class App extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          formValue: '',
+          error: null,
+          isLoaded: false,
+          items: [],
+          pageList: [],
+          pageNumber: 1,
+          currentView: "all",
+        };
+
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleClick = this.handleClick.bind(this);
+        this.handleProfileClick = this.handleProfileClick.bind(this);
+      }
+
+      handleChange(event) {
+        this.setState({value: event.target.value});
+      }
+
+      handleSubmit(event) {
+        const requestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+          },
+          body: JSON.stringify({ body: this.state.value})
+        };
+        fetch('/posts/compose', requestOptions)
+          .then(response => response.json())
+          .then(result => {
+            // console.log(result);
+          })
+        alert('A post was submitted: ' + this.state.value);
+        //event.preventDefault();
+      }
+
+      componentDidMount() {
+        fetch(`/posts/all/${this.state.pageNumber}`)
+          .then(res => res.json())
+          .then(
+            (result) => {
+              this.setState({
+                isLoaded: true,
+                items: result.pages,
+                pageList: result.page_list,
+                hasNext: result.has_next,
+                hasPrevious: result.has_previous,
+                numPages: result.num_pages,
+              });
+            },
+            // Note: it's important to handle errors here
+            // instead of a catch() block so that we don't swallow
+            // exceptions from actual bugs in components.
+            (error) => {
+              this.setState({
+                isLoaded: true,
+                error
+              });
+            }
+          )
+      }
+
+      // pagination click handler
+      handleClick(index) {
+        let pageNumber = this.state.pageNumber === index ? this.state.pageNumber : index;
+        this.setState({pageNumber});
+        console.log(`clicked: ${index}, current is ${this.state.pageNumber}`);
+        fetch(`/posts/all/${index}`)
+          .then(res => res.json())
+          .then(
+            (result) => {
+              this.setState({
+                isLoaded: true,
+                items: result.pages,
+                pageList: result.page_list,
+                hasNext: result.has_next,
+                hasPrevious: result.has_previous,
+                numPages: result.num_pages,
+              });
+            },
+            // Note: it's important to handle errors here
+            // instead of a catch() block so that we don't swallow
+            // exceptions from actual bugs in components.
+            (error) => {
+              this.setState({
+                isLoaded: true,
+                error
+              });
+            }
+          )
+      }
+
+      handleProfileClick(index) {
+        this.setState({
+          currentView: index,
+        });
+      }
+
+      render() {
+        // console.log(`state is ${this.state.currentView}`)
+        if (this.state.currentView == "all") {
+          return(
+            <div>
+              <NewPostForm handleChange={this.handleChange}
+                handleSubmit={this.handleSubmit}
+                value={this.formValue}></NewPostForm>
+              <OrderedPosts current={this.state}
+                handleProfileClick={this.handleProfileClick}></OrderedPosts>
+
+              <PaginationNav handleClick={this.handleClick}
+                current={this.state}></PaginationNav>
+            </div>
+          );
+        } else {
+          return(
+            <div>
+              <ProfileView
+                profile_id={this.state.currentView}
+                handleFollowClick={this.handleFollowClick}></ProfileView>
+            </div>
+          );
+        }
+      }
+    }
+
+
+    ReactDOM.render (
+      <App />,
+      document.getElementById('posts-list')
+    );
+
+
+
+  </script>
 {% endblock %}
