@@ -14,6 +14,7 @@
         <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 
         {% block script %}
+          <script src="{% static 'network/index.js' %}"></script>
         {% endblock %}
     </head>
     <body>
@@ -25,7 +26,7 @@
               <ul class="navbar-nav mr-auto">
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/profile/{{ user.pk }}"><strong>{{ user.username }}</strong></a>
+                        <a id="user-profile-link" value={{ user.pk }} class="nav-link"><strong>{{ user.username }}</strong></a>
                     </li>
                 {% endif %}
                 <li class="nav-item">
@@ -33,7 +34,7 @@
                 </li>
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Following</a>
+                        <a id="following-link" class="nav-link" href="#">Following</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'logout' %}">Log Out</a>

@@ -18,14 +18,14 @@ function load_dashboard(posts_type) {
   //  Create the posts view
   function createPostsView(currentPageNumber) {
     console.log(window.location.pathname);
-    username = document.getElementById('username').getAttribute('value');
+    owner_pk = document.getElementById('username').getAttribute('value');
     console.log(username);
     console.log(`posts type is ${posts_type}`);
     fetch('/posts', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'authors': 'all',
+        'authors': owner_pk,
       },
     })
     .then(response => response.json())

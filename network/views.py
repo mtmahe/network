@@ -103,8 +103,8 @@ def query_posts(request):
         print('not get')
         return JsonResponse({"error": "GET request required."}, status=400)
 
-
-    if request.headers['authors'] == 'all':
+    print(request.headers['authors'])
+    if request.headers['authors'] == 'all_posts':
         posts = Post.objects.all().order_by("-id")
     else:
         author_list = [int(author) for author in request.headers['authors'].split(",")]
@@ -162,7 +162,7 @@ def query_user_posts(request, user_pk, page_number):
     return JsonResponse(current_page, safe=False)
 
 
-def profile(request, user):
+def profile(request, owner_pk):
     """ Display user profile """
 
     # need to update the call to user number also

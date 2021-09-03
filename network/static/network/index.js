@@ -1,17 +1,38 @@
 document.addEventListener('DOMContentLoaded', function() {
 
+  // Layout buttons
+  let user_pk = document.getElementById('user-profile-link').getAttribute('value');
+  //console.log(user_pk);
+  document.querySelector('#user-profile-link').addEventListener('click', () => load_dashboard(user_pk));
+  document.querySelector('#following-link').addEventListener('click', () => load_dashboard('following'));
+
   load_dashboard('all_posts');
 });
 
 function load_dashboard(posts_type) {
+  // Note: posts_type will be the owner_pk for Profile views.
 
+  //console.log(`posts type dash ${posts_type}`)
   // Log posts name
   let title = return_title(posts_type);
-  console.log(title);
+  //console.log(`title ${title}`)
 
   // Show the dashboard and hide the others
-  document.querySelector('#new-post-view').style.display = 'block';
-  document.querySelector('#posts-view').style.display = 'block';
+  if (title == 'All posts') {
+    document.querySelector('#new-post-view').style.display = 'block';
+    document.querySelector('#posts-view').style.display = 'block';
+    document.querySelector('#profile-view').style.display = 'none';
+  } else if (title == 'Profile') {
+    document.querySelector('#new-post-view').style.display = 'none';
+    document.querySelector('#posts-view').style.display = 'block';
+    document.querySelector('#profile-view').style.display = 'block';
+    createProfileView(posts_type);
+  } else if (title == 'Following') {
+    document.querySelector('#new-post-view').style.display = 'none';
+    document.querySelector('#posts-view').style.display = 'block';
+    document.querySelector('#profile-view').style.display = 'none';
+  }
+
 
   // Show the dashboard name
   document.querySelector('#title').innerHTML = `<h3>${title}</h3>`;
@@ -30,32 +51,74 @@ function load_dashboard(posts_type) {
     })
     .then(response => response.json())
     .then(result => {
-      console.log(result);
+      console.log(`result ${result}`);
       load_dashboard('all_posts');
     })
 
     return false;
   }
 
-  createPostsView('1');
+
+  function createProfileView(posts_type) {
+    // Follows Count
+    fetch(`/profile/follows/${posts_type}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'authors': posts_type,
+      },
+    })
+    .then(response => response.json())
+    .then(result => {
+      document.getElementById('follower-count').innerHTML = `Following ${result}`;
+    })
+    // Following count
+    fetch(`/profile/followers/${posts_type}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'authors': posts_type,
+      },
+    })
+    .then(response => response.json())
+    .then(result => {
+      document.getElementById('following-count').innerHTML = `Followers ${result}`;
+    })
+    // Follow button
+    let user_pk = document.getElementById('user-profile-link').getAttribute('value');
+    if (posts_type != user_pk) {
+      document.querySelector('#follow-button').style.display = 'block';
+      document.querySelector('#follow-button').addEventListener('click', () => followClick());
+    } else {
+      document.querySelector('#follow-button').style.display = 'none';
+    };
+  };
+
+  createPostsView('1', posts_type);
 
   //  Create the posts view
-  function createPostsView(currentPageNumber) {
+  function createPostsView(currentPageNumber, posts_type) {
     console.log(`posts type is ${posts_type}`)
     fetch('/posts', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'authors': 'all',
+        'authors': posts_type,
       },
     })
     .then(response => response.json())
     .then(my_pages => {
+      // First, clear posts if there are any.
+      const element = document.getElementById('paginate-posts');
+      while (element.firstChild) {
+        element.removeChild(element.firstChild);
+      };
       const currentPage = my_pages.pages[currentPageNumber];
       const numPages = my_pages.num_pages;
       const hasNext = currentPage.has_next;
       const hasPrevious = currentPage.has_previous;
       currentPage.page_list.forEach(append_post_node);
+
 
       // Create the individual post containers and append to view
       function append_post_node(item) {
@@ -73,7 +136,8 @@ function load_dashboard(posts_type) {
         owner.append(node)
         next_post.appendChild(owner);
         owner.addEventListener('click', function() {
-          window.location.href=`/profile/${item.owner}`;
+          load_dashboard(item.owner_pk)
+          //window.location.href=`/profile/${item.owner_pk}`;
         })
 
         const body = document.createElement('p');
@@ -142,13 +206,16 @@ function load_dashboard(posts_type) {
 
     // load the selected page
     //load_dashboard('all_posts', currentPageNumber);
-    createPostsView(currentPageNumber);
+    createPostsView(currentPageNumber, posts_type);
   }
 }
 
 
 function return_title(name) {
   // Return the title given name.
+  if (name != 'all_posts' && name != 'following') {
+    name = 'profile';
+  };
 
   const names = {
     all_posts: 'All posts',
@@ -157,4 +224,9 @@ function return_title(name) {
   };
 
   return names[name];
+}
+
+
+function followClick() {
+
 }

@@ -13,6 +13,12 @@
       </form>
     </div>
 
+    <div class="section-container" id="profile-view">
+      <div id="follower-count">followers</div>
+      <div id="following-count">following</div>
+      <button id="follow-button" type="button" name="follow-button" class="btn btn-secondary">Follow</button>
+    </div>
+
     <div id="posts-view">
       <div id="paginate-posts"></div>
       <div id="paginate-nav">
@@ -36,8 +42,4 @@
       </div>
     </div>
   </div>
-{% endblock %}
-
-{% block script %}
-  <script src="{% static 'network/index.js' %}"></script>
 {% endblock %}
