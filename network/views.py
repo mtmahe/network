@@ -103,8 +103,12 @@ def query_posts(request):
         print('not get')
         return JsonResponse({"error": "GET request required."}, status=400)
 
+
     if request.headers['authors'] == 'all':
         posts = Post.objects.all().order_by("-id")
+    else:
+        author_list = [int(author) for author in request.headers['authors'].split(",")]
+        posts = Post.objects.filter(user_id__in=author_list).order_by('-id')
 
     # Create paginated json for response
     my_posts = {}
@@ -123,6 +127,7 @@ def query_posts(request):
             'has_previous': p.page(i+1).has_previous()
         }
     my_posts['pages'] = pages
+    #my_posts['user'] = request.user
 
     #return JsonResponse([post.serialize() for post in posts], safe=False)
     return JsonResponse(my_posts, safe=False)

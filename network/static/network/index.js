@@ -45,6 +45,7 @@ function load_dashboard(posts_type) {
     fetch('/posts', {
       method: 'GET',
       headers: {
+        'Content-Type': 'application/json',
         'authors': 'all',
       },
     })
