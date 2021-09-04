@@ -187,8 +187,10 @@ def follow(request):
     # Get contents of post
     print('follow request')
     data = json.loads(request.body)
+    print(f'data = {data}')
     user = request.user.pk
     followed = data.get("followed", "")
+    print(f'followed is {followed}')
     followed = User.objects.get(pk=followed)
     print(f'The user is {user}, followed is {followed}')
 
@@ -252,13 +254,16 @@ def query_followers(request, user_pk):
         return JsonResponse({"error": "GET request required."}, status=400)
 
     result = Follow.objects.filter(followed=user_pk)
-    followed = [follow.followed.pk for follow in result]
-    followed_total = 0;
-    for i in followed:
-        followed_total += i
-    followed_json = json.dumps(followed_total)
+    following = [follow.follower.pk for follow in result]
+    following_total = []
+    for i in following:
+        following_total.append(i)
+    #followed_json = json.dumps(followed_total)
+    following_json = {
+        'following_total': following_total,
+    }
 
-    return JsonResponse(followed_json, safe=False)
+    return JsonResponse(following_json, safe=False)
 
 
 def query_name(request, user_pk):

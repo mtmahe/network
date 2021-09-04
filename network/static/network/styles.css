@@ -12,10 +12,21 @@
 
 .profile-link-div {
   margin-bottom: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #cfcfcf;
+  border-radius: .2em;
 }
 
 .profile-link-div:hover {
   background-color: AliceBlue;
+}
+
+.post-owner-link {
+  display: inline;
+  background-color: #99ccff;
+  padding: 0.2em;
+  border: 1px solid #cfcfcf;
+  border-radius: .2em;
 }
 
 ul {
