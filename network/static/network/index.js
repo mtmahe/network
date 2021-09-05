@@ -67,7 +67,6 @@ function load_dashboard(posts_type, user_pk) {
 
 
   function createProfileView(posts_type, user_pk) {
-    console.log(`createProfile PT is ${posts_type}, UPK is ${user_pk}`)
     // looking for int so convert posts_type if necessary
     if (posts_type == 'profile' || posts_type == 'following') {
       posts_type = user_pk;
@@ -174,7 +173,6 @@ function load_dashboard(posts_type, user_pk) {
         next_post.appendChild(owner);
         owner.addEventListener('click', function() {
           load_dashboard(item.owner_pk, user_pk)
-          //window.location.href=`/profile/${item.owner_pk}`;
         })
 
         let body_div = document.createElement('div');
@@ -183,11 +181,6 @@ function load_dashboard(posts_type, user_pk) {
         body.append(node)
         body_div.appendChild(body);
         next_post.appendChild(body_div);
-
-        //let body = document.createElement('p');
-        //node = document.createTextNode(item.body);
-        //body.append(node)
-        //next_post.appendChild(body);
 
         const timestamp = document.createElement('small');
         node = document.createTextNode(item.timestamp);
@@ -199,12 +192,14 @@ function load_dashboard(posts_type, user_pk) {
         likes.append(node)
         next_post.appendChild(likes);
 
+        // only post owner should see edit button
         if (item.owner_pk == user_pk) {
-          console.log(`same dude.`);
           const edit = document.createElement('button');
           edit.innerHTML = 'Edit';
           next_post.appendChild(edit);
           edit.addEventListener('click', function() {
+
+            // remove body and replace with edit form
             console.log('edit was clicked');
             body_div.removeChild(body);
 
@@ -230,7 +225,6 @@ function load_dashboard(posts_type, user_pk) {
             // Submit edit post
             document.querySelector('#edit-form').onsubmit = () => {
               console.log('submitting');
-              console.log(`id is ${item.id}`);
               let newBody = document.querySelector('#edit-post-body').value;
               fetch('/posts/edit', {
                 method: 'POST',
@@ -248,6 +242,7 @@ function load_dashboard(posts_type, user_pk) {
                 //load_dashboard('all_posts');
               })
 
+              // Now remove text area and put back the new body
               body_div.removeChild(editForm);
 
               let body = document.createElement('p');
