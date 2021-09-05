@@ -95,6 +95,31 @@ def compose(request):
 
 
 @csrf_exempt
+def edit_post(request):
+    """ Edit a new post """
+
+    if request.method != "POST":
+        print('not post')
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    # Get contents of post
+    print('post request')
+    data = json.loads(request.body)
+    body = data.get("body", "")
+    print(f'The body is {body}')
+    post_id = request.headers['post-id']
+    print(f'post id {post_id}')
+
+
+    # Create new post
+    post = Post.objects.get(pk=post_id)
+    post.body = body
+    post.save()
+
+    return JsonResponse({"message": "Post edited successfully."}, status=201)
+
+
+@csrf_exempt
 def query_posts(request):
     """ Get selected posts """
 

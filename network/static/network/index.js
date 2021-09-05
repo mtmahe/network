@@ -48,7 +48,7 @@ function load_dashboard(posts_type, user_pk) {
   document.querySelector('#new-post-body').value = '';
 
   // Submit new post
-  document.querySelector('form').onsubmit = () => {
+  document.querySelector('#new-post-form').onsubmit = () => {
     console.log('submitting');
     fetch('/posts/compose', {
       method: 'POST',
@@ -155,8 +155,11 @@ function load_dashboard(posts_type, user_pk) {
 
       // Create the individual post containers and append to view
       function append_post_node(item) {
+        //console.log(item);
         // Select element to update
         const element = document.getElementById('paginate-posts');
+
+        let isEdit = false;
 
         // create container for each post
         var next_post = document.createElement('div');
@@ -174,10 +177,17 @@ function load_dashboard(posts_type, user_pk) {
           //window.location.href=`/profile/${item.owner_pk}`;
         })
 
-        const body = document.createElement('p');
+        let body_div = document.createElement('div');
+        let body = document.createElement('p');
         node = document.createTextNode(item.body);
         body.append(node)
-        next_post.appendChild(body);
+        body_div.appendChild(body);
+        next_post.appendChild(body_div);
+
+        //let body = document.createElement('p');
+        //node = document.createTextNode(item.body);
+        //body.append(node)
+        //next_post.appendChild(body);
 
         const timestamp = document.createElement('small');
         node = document.createTextNode(item.timestamp);
@@ -189,6 +199,66 @@ function load_dashboard(posts_type, user_pk) {
         likes.append(node)
         next_post.appendChild(likes);
 
+        if (item.owner_pk == user_pk) {
+          console.log(`same dude.`);
+          const edit = document.createElement('button');
+          edit.innerHTML = 'Edit';
+          next_post.appendChild(edit);
+          edit.addEventListener('click', function() {
+            console.log('edit was clicked');
+            body_div.removeChild(body);
+
+            let editForm = document.createElement('form');
+            editForm.setAttribute('id', 'edit-form');
+
+            let editBody = document.createElement('textarea');
+            editBody.setAttribute('class', 'form-control');
+            editBody.setAttribute('id', 'edit-post-body');
+            editBody.rows = "2";
+            editBody.cols = "40";
+            editBody.value = item.body;
+
+            let editButton = document.createElement('input');
+            editButton.type = "submit";
+            editButton.value = "Post";
+            editButton.setAttribute('class', 'btn btn-primary');
+
+            editForm.appendChild(editBody);
+            editForm.appendChild(editButton);
+            body_div.appendChild(editForm);
+
+            // Submit edit post
+            document.querySelector('#edit-form').onsubmit = () => {
+              console.log('submitting');
+              console.log(`id is ${item.id}`);
+              let newBody = document.querySelector('#edit-post-body').value;
+              fetch('/posts/edit', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'post-id': item.id,
+                },
+                body: JSON.stringify({
+                  body: document.querySelector('#edit-post-body').value,
+                })
+              })
+              .then(response => response.json())
+              .then(result => {
+                console.log(`result ${result.message}`);
+                //load_dashboard('all_posts');
+              })
+
+              body_div.removeChild(editForm);
+
+              let body = document.createElement('p');
+              node = document.createTextNode(newBody);
+              body.append(node)
+              body_div.appendChild(body);
+
+              return false;
+            }
+          })
+        };
 
         element.appendChild(next_post);
       }
