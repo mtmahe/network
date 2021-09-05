@@ -105,6 +105,11 @@ def query_posts(request):
 
     if request.headers['authors'] == 'all_posts':
         posts = Post.objects.all().order_by("-id")
+    elif request.headers['authors']  == 'following':
+        print(f'user pk is {request.user.pk}')
+        follows = query_following_raw(request.user.pk)
+        posts = Post.objects.filter(user__in=follows).order_by("-id")
+        # retrieve posts where user is in current users followed list.
     else:
         author_list = [int(author) for author in request.headers['authors'].split(",")]
         posts = Post.objects.filter(user_id__in=author_list).order_by('-id')
@@ -130,6 +135,17 @@ def query_posts(request):
 
     #return JsonResponse([post.serialize() for post in posts], safe=False)
     return JsonResponse(my_posts, safe=False)
+
+
+def query_following_raw(user):
+    """ return a list of whom the user is following, used by query_posts """
+
+    result = Follow.objects.filter(follower=user)
+
+    follows = [follow.followed.pk for follow in result]
+    print(follows)
+
+    return follows
 
 
 def query_user_posts(request, user_pk, page_number):

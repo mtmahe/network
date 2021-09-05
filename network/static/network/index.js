@@ -128,7 +128,7 @@ function load_dashboard(posts_type, user_pk) {
 
   //  Create the posts view
   function createPostsView(currentPageNumber, posts_type) {
-    if (posts_type == 'profile' || posts_type == 'following') {
+    if (posts_type == 'profile') {
       posts_type = user_pk;
     }
     //console.log(`posts type is ${posts_type}`)
