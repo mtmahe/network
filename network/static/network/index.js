@@ -1,30 +1,25 @@
 document.addEventListener('DOMContentLoaded', function() {
 
   // Layout buttons
-  //let user_pk = 3;
+  let user_pk = 0;
 
   if (document.getElementById('user-profile-link')) {
     //console.log('true');
-    let user_pk = document.getElementById('user-profile-link').getAttribute('value');
-    document.querySelector('#user-profile-link').addEventListener('click', () => load_dashboard(user_pk));
-    document.querySelector('#following-link').addEventListener('click', () => load_dashboard('following'));
-  } else {
-    //console.log('false');
-  };
+    console.log('got here')
+    user_pk = document.getElementById('user-profile-link').getAttribute('value');
+    document.querySelector('#user-profile-link').addEventListener('click', () => load_dashboard('profile', user_pk));
+    document.querySelector('#following-link').addEventListener('click', () => load_dashboard('following', user_pk));
+  }
 
 
-  load_dashboard('all_posts');
+  load_dashboard('all_posts', user_pk);
 });
 
-function load_dashboard(posts_type) {
-  // Note: posts_type will be the owner_pk for Profile views.
+function load_dashboard(posts_type, user_pk) {
+  console.log(`ld pk is ${user_pk}`);
+  // posts type is 'all', 'follow' or pk of chosen user's profile.
+  // user pk is logged in user's pk or zero.
 
-  //let user_pk = document.getElementById('user-profile-link').getAttribute('value');
-  //document.querySelector('#user-profile-link').addEventListener('click', () => load_dashboard(user_pk));
-  //document.querySelector('#following-link').addEventListener('click', () => load_dashboard('following'));
-
-
-  //console.log(`posts type dash ${posts_type}`)
   // Log posts name
   let title = return_title(posts_type);
   //console.log(`title ${title}`)
@@ -38,7 +33,7 @@ function load_dashboard(posts_type) {
     document.querySelector('#new-post-view').style.display = 'none';
     document.querySelector('#posts-view').style.display = 'block';
     document.querySelector('#profile-view').style.display = 'block';
-    createProfileView(posts_type);
+    createProfileView(posts_type, user_pk);
   } else if (title == 'Following') {
     document.querySelector('#new-post-view').style.display = 'none';
     document.querySelector('#posts-view').style.display = 'block';
@@ -71,7 +66,7 @@ function load_dashboard(posts_type) {
   }
 
 
-  function createProfileView(posts_type) {
+  function createProfileView(posts_type, user_pk) {
     // Follows Count
     fetch(`/profile/follows/${posts_type}`, {
       method: 'GET',
@@ -99,14 +94,12 @@ function load_dashboard(posts_type) {
       followingList = result.following_total;
       //console.log(`follow list updated to ${followingList}, length is ${followingList.length}`);
       document.getElementById('following-count').innerHTML = `Followers ${followingList.length}`;
-      // Follow button
-      let user_pk = 0;
-      if (document.getElementById('user-profile-link')) {
-        user_pk = document.getElementById('user-profile-link').getAttribute('value');
-      };
 
+      // Follow button
       // check if profile is current users, then they don't see follow button.
-      if (posts_type != user_pk) {
+      console.log(`PT is ${posts_type}, upk is ${user_pk}`);
+      if (posts_type != user_pk && user_pk != 0) {
+        console.log('past first hoop')
         document.querySelector('#follow-button').style.display = 'block';
 
         // check if user is currently following profile owner and set button content.
@@ -174,7 +167,7 @@ function load_dashboard(posts_type) {
         owner.setAttribute('class', 'post-owner-link');
         next_post.appendChild(owner);
         owner.addEventListener('click', function() {
-          load_dashboard(item.owner_pk)
+          load_dashboard(item.owner_pk, user_pk)
           //window.location.href=`/profile/${item.owner_pk}`;
         })
 
