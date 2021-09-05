@@ -103,7 +103,6 @@ def query_posts(request):
         print('not get')
         return JsonResponse({"error": "GET request required."}, status=400)
 
-    print(request.headers['authors'])
     if request.headers['authors'] == 'all_posts':
         posts = Post.objects.all().order_by("-id")
     else:
@@ -238,12 +237,13 @@ def query_following(request, user_pk):
 
     result = Follow.objects.filter(follower=user_pk)
     follows = [follow.followed.pk for follow in result]
-    follows_total = 0;
-    for i in follows:
-        follows_total += i
-    follows_json = json.dumps(follows_total)
+    print(f' follows is {follows}')
+    follows_total = {
+        'following_list': follows,
+    }
+    #follows_json = json.dumps(follows_total)
 
-    return JsonResponse(follows_json, safe=False)
+    return JsonResponse(follows_total, safe=False)
 
 
 def query_followers(request, user_pk):

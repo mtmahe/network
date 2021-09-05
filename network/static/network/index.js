@@ -77,7 +77,10 @@ function load_dashboard(posts_type, user_pk) {
     })
     .then(response => response.json())
     .then(result => {
-      document.getElementById('follower-count').innerHTML = `Following ${result.length}`;
+      console.log(`result is ${result.following_list}`)
+      followsList = [];
+      followsList = result.following_list;
+      document.getElementById('follower-count').innerHTML = `Following ${followsList.length}`;
     })
     // Following count
     fetch(`/profile/followers/${posts_type}`, {
