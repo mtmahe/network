@@ -67,6 +67,11 @@ function load_dashboard(posts_type, user_pk) {
 
 
   function createProfileView(posts_type, user_pk) {
+    console.log(`createProfile PT is ${posts_type}, UPK is ${user_pk}`)
+    // looking for int so convert posts_type if necessary
+    if (posts_type == 'profile' || posts_type == 'following') {
+      posts_type = user_pk;
+    }
     // Follows Count
     fetch(`/profile/follows/${posts_type}`, {
       method: 'GET',
@@ -77,7 +82,6 @@ function load_dashboard(posts_type, user_pk) {
     })
     .then(response => response.json())
     .then(result => {
-      console.log(`result is ${result.following_list}`)
       followsList = [];
       followsList = result.following_list;
       document.getElementById('follower-count').innerHTML = `Following ${followsList.length}`;
@@ -100,19 +104,12 @@ function load_dashboard(posts_type, user_pk) {
 
       // Follow button
       // check if profile is current users, then they don't see follow button.
-      console.log(`PT is ${posts_type}, upk is ${user_pk}`);
       if (posts_type != user_pk && user_pk != 0) {
-        console.log('past first hoop')
         document.querySelector('#follow-button').style.display = 'block';
 
         // check if user is currently following profile owner and set button content.
         if (followingList == user_pk || followingList.includes(user_pk)) {
-          console.log('in li');
-          console.log(`innerHTML is ${document.getElementById('follow-button').innerHTML}`);
           document.getElementById('follow-button').innerHTML = 'Unfollow';
-          console.log(`innerHTML is now ${document.getElementById('follow-button').innerHTML}`);
-        } else {
-          console.log('not');
         };
 
         // event listener for follow button.
@@ -131,6 +128,9 @@ function load_dashboard(posts_type, user_pk) {
 
   //  Create the posts view
   function createPostsView(currentPageNumber, posts_type) {
+    if (posts_type == 'profile' || posts_type == 'following') {
+      posts_type = user_pk;
+    }
     //console.log(`posts type is ${posts_type}`)
     fetch('/posts', {
       method: 'GET',

@@ -186,12 +186,9 @@ def follow(request):
     # Get contents of post
     print('follow request')
     data = json.loads(request.body)
-    print(f'data = {data}')
     user = request.user.pk
     followed = data.get("followed", "")
-    print(f'followed is {followed}')
     followed = User.objects.get(pk=followed)
-    print(f'The user is {user}, followed is {followed}')
 
     result = Follow.objects.filter(follower=user).filter(followed=followed)
 
@@ -237,7 +234,6 @@ def query_following(request, user_pk):
 
     result = Follow.objects.filter(follower=user_pk)
     follows = [follow.followed.pk for follow in result]
-    print(f' follows is {follows}')
     follows_total = {
         'following_list': follows,
     }
