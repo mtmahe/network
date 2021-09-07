@@ -4,8 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
   let user_pk = 0;
 
   if (document.getElementById('user-profile-link')) {
-    //console.log('true');
-    console.log('got here')
     user_pk = document.getElementById('user-profile-link').getAttribute('value');
     document.querySelector('#user-profile-link').addEventListener('click', () => load_dashboard('profile', user_pk));
     document.querySelector('#following-link').addEventListener('click', () => load_dashboard('following', user_pk));
@@ -17,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function load_dashboard(posts_type, user_pk) {
   const csrftoken = getCookie('csrftoken');
-  console.log(`ld pk is ${user_pk}`);
   // posts type is 'all', 'follow' or pk of chosen user's profile.
   // user pk is logged in user's pk or zero.
 
@@ -218,10 +215,8 @@ function load_dashboard(posts_type, user_pk) {
             // keep follow icon updated
             likeResponse = isLiked(item.id);
             likeResponse.then(value => { if (value == 'false') {
-              console.log(`value ${item.id} ${value}`)
               img.src = '/static/network/white_heart.png';
             } else {
-              console.log(`value ${item.id} ${value}`)
               img.src = '/static/network/red_heart.png';
             }});
           })
@@ -338,8 +333,6 @@ function load_dashboard(posts_type, user_pk) {
 
     var currentPageNumber = String(parseInt(evt.currentTarget.currentPageNumber) + evt.currentTarget.amount);
 
-    console.log(currentPageNumber);
-
     // load the selected page
     //load_dashboard('all_posts', currentPageNumber);
     createPostsView(currentPageNumber, posts_type);
@@ -365,7 +358,6 @@ function return_title(name) {
 
 function followClick(followed, length, wasFollowing, csrftoken) {
   console.log('follow function')
-  console.log(`csrftoken is ${csrftoken}`)
   fetch('/profile/follow', {
     method: 'POST',
     headers: {'X-CSRFToken': csrftoken},
