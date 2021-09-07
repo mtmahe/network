@@ -401,6 +401,7 @@ function followClick(followed, length, wasFollowing, csrftoken) {
 
 async function likeClicked(post_id, likes, csrftoken) {
   console.log('like was clicked');
+  // use await so that .then in main function waits.
   await fetch(`/profile/like/${post_id}`, {
     method: 'POST',
     headers: {'X-CSRFToken': csrftoken},

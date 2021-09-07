@@ -139,7 +139,6 @@ def query_posts(request):
     if request.headers['authors'] == 'all_posts':
         posts = Post.objects.all().order_by("-id")
     elif request.headers['authors']  == 'following':
-        print(f'user pk is {request.user.pk}')
         follows = query_following_raw(request.user.pk)
         posts = Post.objects.filter(user__in=follows).order_by("-id")
         # retrieve posts where user is in current users followed list.
@@ -176,7 +175,6 @@ def query_following_raw(user):
     result = Follow.objects.filter(follower=user)
 
     follows = [follow.followed.pk for follow in result]
-    print(follows)
 
     return follows
 
@@ -215,7 +213,6 @@ def profile(request, owner_pk):
 
     # need to update the call to user number also
     follows = Follow.objects.filter(follower = 1)
-    print(f'profile: {follows}')
 
     objects = [follow.serialize() for follow in follows]
 
@@ -393,8 +390,6 @@ def query_likes(request, post_id):
         total_likes = len(result)
     else:
         total_likes = 0
-    #followed_json = json.dumps(followed_total)
-    print(f'total {total_likes}')
     likes_json = {
         'total_likes': total_likes,
     }
