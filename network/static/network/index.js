@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function load_dashboard(posts_type, user_pk) {
+  const csrftoken = getCookie('csrftoken');
   console.log(`ld pk is ${user_pk}`);
   // posts type is 'all', 'follow' or pk of chosen user's profile.
   // user pk is logged in user's pk or zero.
@@ -51,14 +52,16 @@ function load_dashboard(posts_type, user_pk) {
   document.querySelector('#new-post-form').onsubmit = () => {
     console.log('submitting');
     fetch('/posts/compose', {
+      headers: {'X-CSRFToken': csrftoken},
       method: 'POST',
+      mode: 'same-origin', // Do not send CSRF token to another domain.
       body: JSON.stringify({
         body: document.querySelector('#new-post-body').value,
       })
     })
     .then(response => response.json())
     .then(result => {
-      console.log(`result ${result}`);
+      console.log(`result ${result.message}`);
       load_dashboard('all_posts');
     })
 
@@ -187,10 +190,22 @@ function load_dashboard(posts_type, user_pk) {
         timestamp.append(node)
         next_post.appendChild(timestamp);
 
-        const likes = document.createElement('p');
-        node = document.createTextNode('Likes');
-        likes.append(node)
-        next_post.appendChild(likes);
+        let likes_div = document.createElement('div');
+        let likes = document.createElement('p');
+        let img = document.createElement('img');
+        img.src = '/static/network/red_heart.png';
+        img.setAttribute('class', 'icon');
+        likes_div.appendChild(img);
+        likes_div.appendChild(likes);
+
+        likesCount = countLikes(item.id);
+        likesCount.then(value => { likes.innerHTML = value; });
+
+        next_post.appendChild(likes_div);
+        img.addEventListener('click', function() {
+
+          likeClicked(item.id, likes);
+        });
 
         // only post owner should see edit button
         if (item.owner_pk == user_pk) {
@@ -356,4 +371,56 @@ function followClick(followed, length, wasFollowing) {
       document.getElementById('following-count').innerHTML = `Followers ${length}`;
     };
   })
+}
+
+
+function likeClicked(post_id, likes) {
+  console.log('like was clicked');
+  fetch(`/profile/like/${post_id}`, {
+    method: 'POST',
+  })
+  .then(response => response.json())
+  .then(result => {
+    console.log(result.message);
+    likesCount = countLikes(post_id);
+    likesCount.then(value => { likes.innerHTML = value; });
+  })
+}
+
+
+async function countLikes(itemID) {
+  let likes = 0;
+  // Likes count
+  let response = await fetch(`/profile/like_count/${itemID}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  if (response.ok) {
+    let json = await response.json();
+    likes = json["total_likes"];
+  } else {
+    alert("HTTP-Error: " + response.status);
+    console.log(response.status)
+  };
+  return likes;
+}
+
+
+function getCookie(name) {
+  // csrf token
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      // Does this cookie string begin with the name we want?
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }

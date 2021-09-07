@@ -15,6 +15,8 @@ urlpatterns = [
     path("posts/compose", views.compose, name="compose"),
     path("posts", views.query_posts, name="query_posts"),
     path("posts/edit", views.edit_post, name="edit_post"),
+    path("profile/like/<int:post_id>", views.like, name="like"),
+    path("profile/like_count/<int:post_id>", views.query_likes, name="like_count"),
 
 
     #path("posts/all/<int:page_number>", views.query_posts, name="query_posts_paginated"),

@@ -10,7 +10,7 @@ from django.core.paginator import Paginator
 
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import User, Post, Follow
+from .models import User, Post, Follow, Like
 
 
 def index(request):
@@ -70,7 +70,8 @@ def register(request):
         return render(request, "network/register.html")
 from django.views.decorators.csrf import csrf_exempt
 
-@csrf_exempt
+
+@login_required
 def compose(request):
     """ Compose a new post """
 
@@ -109,6 +110,13 @@ def edit_post(request):
     print(f'The body is {body}')
     post_id = request.headers['post-id']
     print(f'post id {post_id}')
+
+    # Make sure they own the post
+    user = request.user
+    current = Post.objects.get(id=post_id)
+    print(user, current.user)
+    if user != current.user:
+        return JsonResponse({"message": "You may only edit your own posts."}, status=400)
 
 
     # Create new post
@@ -323,3 +331,56 @@ def view_following(request):
     """ show posts for only users being followed """
 
     return render(request, "network/following.html")
+
+
+@csrf_exempt
+@login_required
+def like(request, post_id):
+    """ like or unlike """
+
+    if request.method != "POST":
+        print('not post')
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    # Get contents of post
+    print('like request')
+    user = request.user.pk
+    liked = Post.objects.get(pk=post_id)
+    result = Like.objects.filter(user=user).filter(liked=liked)
+
+    if not result:
+        like = Like(
+            user=request.user,
+            liked=liked
+        )
+        like.save()
+
+        return JsonResponse({"message": "like added"})
+
+    print('remove like')
+    result.delete()
+
+    return JsonResponse({"message": "like removed"})
+
+
+def query_likes(request, post_id):
+    """ Get a count of likes for post """
+
+    if request.method != "GET":
+        print('not get')
+        return JsonResponse({"error": "GET request required."}, status=400)
+
+    result = Like.objects.filter(liked=post_id)
+    print(f'result {result}')
+    if result:
+        total_likes = len(result)
+    else:
+        total_likes = 0
+    #followed_json = json.dumps(followed_total)
+    print(f'total {total_likes}')
+    likes_json = {
+        'total_likes': total_likes,
+    }
+    #likes_json = json.dumps(likes_json)
+
+    return JsonResponse(likes_json, safe=False)
