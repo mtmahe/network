@@ -193,17 +193,38 @@ function load_dashboard(posts_type, user_pk) {
         let likes_div = document.createElement('div');
         let likes = document.createElement('p');
         let img = document.createElement('img');
-        img.src = '/static/network/red_heart.png';
+        img.src = '/static/network/white_heart.png';
         img.setAttribute('class', 'icon');
+        likes_div.setAttribute('class', 'likes-div');
         likes_div.appendChild(img);
         likes_div.appendChild(likes);
 
+        //keep likes updated
         likesCount = countLikes(item.id);
         likesCount.then(value => { likes.innerHTML = value; });
 
+        // keep follow icon updated
+        likeResponse = isLiked(item.id);
+        likeResponse.then(value => { if (value == 'false') {
+          img.src = '/static/network/white_heart.png';
+        } else {
+          img.src = '/static/network/red_heart.png';
+        }});
+
         next_post.appendChild(likes_div);
         img.addEventListener('click', function() {
-          likeClicked(item.id, likes, csrftoken);
+          likeClick = likeClicked(item.id, likes, csrftoken);
+          likeClick.then(value => {
+            // keep follow icon updated
+            likeResponse = isLiked(item.id);
+            likeResponse.then(value => { if (value == 'false') {
+              console.log(`value ${item.id} ${value}`)
+              img.src = '/static/network/white_heart.png';
+            } else {
+              console.log(`value ${item.id} ${value}`)
+              img.src = '/static/network/red_heart.png';
+            }});
+          })
         });
 
         // only post owner should see edit button
@@ -378,9 +399,9 @@ function followClick(followed, length, wasFollowing, csrftoken) {
 }
 
 
-function likeClicked(post_id, likes, csrftoken) {
+async function likeClicked(post_id, likes, csrftoken) {
   console.log('like was clicked');
-  fetch(`/profile/like/${post_id}`, {
+  await fetch(`/profile/like/${post_id}`, {
     method: 'POST',
     headers: {'X-CSRFToken': csrftoken},
     mode: 'same-origin',  // Do not send CSRF token to another
@@ -391,6 +412,7 @@ function likeClicked(post_id, likes, csrftoken) {
     likesCount = countLikes(post_id);
     likesCount.then(value => { likes.innerHTML = value; });
   })
+  return true;
 }
 
 
@@ -429,4 +451,25 @@ function getCookie(name) {
         }
     }
     return cookieValue;
+}
+
+
+async function isLiked(liked_id) {
+  // check if current user is already following
+  let isLiked = false;
+  let response = await fetch(`/profile/isLiked/${liked_id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  if (response.ok) {
+    let json = await response.json();
+    isLiked = json["liked"];
+  } else {
+    alert("HTTP-Error: " + response.status);
+    console.log(response.status)
+  };
+
+  return isLiked;
 }

@@ -274,6 +274,24 @@ def is_following(request, followed_id):
     return JsonResponse({"followed": "true"})
 
 
+def is_liked(request, liked_id):
+    """ Check if user liked post """
+
+    if request.method != "GET":
+        print('not get')
+        return JsonResponse({"error": "GET request required."}, status=400)
+
+    user = request.user
+    liked = liked_id
+
+    result = Like.objects.filter(user=user).filter(liked=liked)
+
+    if not result:
+        return JsonResponse({"liked": "false"})
+
+    return JsonResponse({"liked": "true"})
+
+
 def query_following(request, user_pk):
     """ Get a list of whom the user is following """
 
