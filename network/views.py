@@ -95,7 +95,7 @@ def compose(request):
     return JsonResponse({"message": "Post added successfully."}, status=201)
 
 
-@csrf_exempt
+@login_required
 def edit_post(request):
     """ Edit a new post """
 
@@ -224,7 +224,7 @@ def profile(request, owner_pk):
     })
 
 
-@csrf_exempt
+@login_required
 def follow(request):
     """ Follow or unfollow """
 
@@ -333,7 +333,6 @@ def view_following(request):
     return render(request, "network/following.html")
 
 
-@csrf_exempt
 @login_required
 def like(request, post_id):
     """ like or unlike """

@@ -119,7 +119,7 @@ function load_dashboard(posts_type, user_pk) {
         if (document.getElementById('follow-button').innerHTML == 'Follow') {
           wasFollowing = false;
         };
-        document.querySelector('#follow-button').addEventListener('click', () => followClick(posts_type, followingList.length, wasFollowing));
+        document.querySelector('#follow-button').addEventListener('click', () => followClick(posts_type, followingList.length, wasFollowing, csrftoken));
       } else {
         document.querySelector('#follow-button').style.display = 'none';
       };
@@ -203,8 +203,7 @@ function load_dashboard(posts_type, user_pk) {
 
         next_post.appendChild(likes_div);
         img.addEventListener('click', function() {
-
-          likeClicked(item.id, likes);
+          likeClicked(item.id, likes, csrftoken);
         });
 
         // only post owner should see edit button
@@ -244,9 +243,11 @@ function load_dashboard(posts_type, user_pk) {
               fetch('/posts/edit', {
                 method: 'POST',
                 headers: {
+                  'X-CSRFToken': csrftoken,
                   'Content-Type': 'application/json',
                   'post-id': item.id,
                 },
+                mode: 'same-origin', // Do not send CSRF token to another domain.
                 body: JSON.stringify({
                   body: document.querySelector('#edit-post-body').value,
                 })
@@ -341,10 +342,13 @@ function return_title(name) {
 }
 
 
-function followClick(followed, length, wasFollowing) {
+function followClick(followed, length, wasFollowing, csrftoken) {
   console.log('follow function')
+  console.log(`csrftoken is ${csrftoken}`)
   fetch('/profile/follow', {
     method: 'POST',
+    headers: {'X-CSRFToken': csrftoken},
+    mode: 'same-origin',  // Do not send CSRF token to another
     body: JSON.stringify({
       'followed': followed,
     })
@@ -374,10 +378,12 @@ function followClick(followed, length, wasFollowing) {
 }
 
 
-function likeClicked(post_id, likes) {
+function likeClicked(post_id, likes, csrftoken) {
   console.log('like was clicked');
   fetch(`/profile/like/${post_id}`, {
     method: 'POST',
+    headers: {'X-CSRFToken': csrftoken},
+    mode: 'same-origin',  // Do not send CSRF token to another
   })
   .then(response => response.json())
   .then(result => {
